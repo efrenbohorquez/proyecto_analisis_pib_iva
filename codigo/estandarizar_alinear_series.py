@@ -157,10 +157,10 @@ def estandarizar_y_alinear_series(df_iva, df_pib_mensual):
     print("Estandarizando fechas al primer día de cada mes...")
     
     # Para IVA: convertir al primer día del mes
-    iva['fecha_estandar'] = iva.index.to_period('M').dt.to_timestamp()
+    iva['fecha_estandar'] = iva.index.to_period('M').to_timestamp()
     
     # Para PIB: ya está en el primer día del mes, pero aseguramos consistencia
-    pib['fecha_estandar'] = pib.index.to_period('M').dt.to_timestamp()
+    pib['fecha_estandar'] = pib.index.to_period('M').to_timestamp()
     
     # Verificar rangos de fechas estandarizadas
     print(f"Rango de fechas IVA estandarizadas: {iva['fecha_estandar'].min().strftime('%Y-%m-%d')} a {iva['fecha_estandar'].max().strftime('%Y-%m-%d')}")
