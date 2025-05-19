@@ -1,0 +1,48 @@
+# Archivos de entorno virtual
+venv/
+.venv/
+ENV/
+env/
+
+# Archivos de Python compilados
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Archivos de configuración del editor/IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de Jupyter Notebook
+.ipynb_checkpoints/
+
+# Archivos de datos sensibles o grandes (si no deben estar en el repo)
+# datos_sensibles/
+# *.csv
+# *.xlsx
+# (Descomenta y ajusta según sea necesario si tienes archivos de datos grandes o sensibles)
+
+# Archivos de logs
+*.log
+
+# Archivos de dependencias de Python (si usas pip freeze > requirements.txt)
+# No es necesario ignorar requirements.txt, ya que debe estar en el repo
+
+# Modelos de Machine Learning (si son muy grandes)
+# modelos/*.h5
+# modelos/*.pkl
+
+# Carpetas de build/distribución
+build/
+dist/
+*.egg-info/
+
+# Archivos específicos de Streamlit (si es necesario)
+.streamlit/
