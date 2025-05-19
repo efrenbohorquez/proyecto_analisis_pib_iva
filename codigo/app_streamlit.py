@@ -6,6 +6,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 
+# Obtener la ruta absoluta del directorio donde se encuentra app_streamlit.py
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Construir rutas relativas al directorio del proyecto (un nivel arriba de SCRIPT_DIR)
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
 # Configuración de estilo similar a los scripts originales
 sns.set_theme(style="whitegrid")
 plt.rcParams['font.family'] = 'sans-serif'
@@ -54,10 +59,10 @@ st.title("Análisis de la Relación entre PIB e IVA en Colombia (2000-2024)")
 st.markdown("**Resultados generados por los scripts de análisis**")
 
 # --- Rutas a los archivos ---
-RUTA_DATOS = "../datos/"
-RUTA_VISUALIZACIONES = "../visualizaciones/"
-RUTA_RESULTADOS = "../resultados/"
-RUTA_MODELOS = "../modelos/"
+RUTA_DATOS = os.path.join(PROJECT_ROOT, "datos")
+RUTA_VISUALIZACIONES = os.path.join(PROJECT_ROOT, "visualizaciones")
+RUTA_RESULTADOS = os.path.join(PROJECT_ROOT, "resultados")
+RUTA_MODELOS = os.path.join(PROJECT_ROOT, "modelos")
 
 # --- Sección de Carga y Alineación de Datos ---
 st.header("1. Carga y Alineación de Datos")
