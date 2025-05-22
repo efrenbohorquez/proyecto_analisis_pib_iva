@@ -117,18 +117,23 @@ else:
     st.warning(f"No se encontró el archivo de componentes: {df_componentes_path}")
 
 # --- Sección de Modelado SARIMA ---
-st.header("5. Modelado SARIMA (para IVA)")
-st.subheader("Análisis ACF y PACF")
+st.header("5. Modelado SARIMA/SARIMAX (para IVA)") # Título actualizado
+st.markdown("Esta sección presenta los resultados del modelado de la serie temporal del IVA utilizando un enfoque SARIMA. Si se incluyeron variables exógenas (como el PIB) en el modelo, se trataría de un modelo SARIMAX.")
+
+st.subheader("Análisis ACF y PACF para la serie de IVA")
 mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "acf_pacf_iva.png"), "Funciones de Autocorrelación (ACF y PACF) para IVA")
 
-st.subheader("Resultados del Modelo SARIMA")
-st.text_area("Resumen del Modelo SARIMA", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "resumen_modelo_sarima_iva.txt")), height=500)
-mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "modelo_sarima_iva.png"), "Modelo SARIMA para IVA: Ajuste y Pronóstico")
-mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "diagnostico_residuos_sarima.png"), "Diagnóstico de Residuos del Modelo SARIMA")
-st.text_area("Métricas del Modelo SARIMA", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "metricas_modelo_sarima_iva.txt")), height=150)
+st.subheader("Resultados del Modelo SARIMA/SARIMAX")
+st.text_area("Resumen del Modelo", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "resumen_modelo_sarima_iva.txt")), height=500)
+st.markdown("El resumen del modelo detalla los coeficientes estimados, errores estándar, y otras estadísticas relevantes. Si se usaron variables exógenas, sus coeficientes también aparecerán aquí.")
+
+mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "modelo_sarima_iva.png"), "Ajuste y Pronóstico del Modelo SARIMA/SARIMAX para IVA")
+mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "diagnostico_residuos_sarima.png"), "Diagnóstico de Residuos del Modelo SARIMA/SARIMAX")
+st.text_area("Métricas de Desempeño del Modelo", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "metricas_modelo_sarima_iva.txt")), height=150)
 
 st.subheader("Prueba de Causalidad de Granger")
-st.text_area("Resultados Causalidad de Granger", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "causalidad_granger.txt")), height=300)
+st.markdown("La prueba de causalidad de Granger se utiliza para determinar si una serie temporal es útil para pronosticar otra.")
+st.text_area("Resultados Causalidad de Granger (PIB vs IVA)", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "causalidad_granger.txt")), height=300)
 
 # --- Sección de Modelado con Redes Neuronales ---
 st.header("6. Modelado con Redes Neuronales (LSTM y GRU para IVA)")

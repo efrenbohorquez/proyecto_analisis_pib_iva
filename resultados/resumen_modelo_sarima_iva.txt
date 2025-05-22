@@ -3,7 +3,7 @@
 Dep. Variable:                                iva   No. Observations:                  288
 Model:             SARIMAX(1, 1, 1)x(1, 1, 1, 12)   Log Likelihood               -4036.869
 Date:                            Wed, 21 May 2025   AIC                           8083.738
-Time:                                    20:25:51   BIC                           8101.561
+Time:                                    21:30:52   BIC                           8101.561
 Sample:                                01-01-2000   HQIC                          8090.902
                                      - 12-01-2023                                         
 Covariance Type:                              opg                                         
