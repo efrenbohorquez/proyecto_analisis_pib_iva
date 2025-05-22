@@ -68,7 +68,8 @@ Esta aplicación está (o puede ser) desplegada usando Streamlit Community Cloud
 
 ## Autor
 
-*   Manus AI (con contribuciones de Efrén Bohórquez)
+  equipo serie de tiempo
+  
 
 ---
 
