@@ -24,6 +24,15 @@ import warnings
 # Configuración para ignorar advertencias
 warnings.filterwarnings('ignore')
 
+# --- Definición de rutas absolutas ---
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
+DATOS_DIR = os.path.join(PROJECT_ROOT, 'datos')
+VISUALIZACIONES_DIR = os.path.join(PROJECT_ROOT, 'visualizaciones')
+RESULTADOS_DIR = os.path.join(PROJECT_ROOT, 'resultados')
+# --- Fin Definición de rutas absolutas ---
+
 # Configuración de visualización al estilo The Economist
 sns.set_theme(style="whitegrid")
 plt.rcParams['font.family'] = 'sans-serif'
@@ -37,9 +46,9 @@ plt.rcParams['figure.titlesize'] = 16
 plt.rcParams['figure.figsize'] = (12, 8)
 
 # Crear directorios si no existen
-os.makedirs('../datos', exist_ok=True)
-os.makedirs('../visualizaciones', exist_ok=True)
-os.makedirs('../resultados', exist_ok=True)
+os.makedirs(DATOS_DIR, exist_ok=True)
+os.makedirs(VISUALIZACIONES_DIR, exist_ok=True)
+os.makedirs(RESULTADOS_DIR, exist_ok=True) # Aseguramos que la carpeta resultados también use la ruta absoluta
 
 # Función para formatear valores en miles de millones
 def formato_miles_millones(x, pos):
@@ -58,7 +67,15 @@ def cargar_datos_iva():
     print("Cargando datos de IVA...")
     
     # Cargar datos de IVA desde el archivo Excel
-    df_iva = pd.read_excel(r"D:\\Downloads\\SERIES DE TIEMPO 2025\\series iva\\data_iva.xlsx") # Ruta corregida
+    # Ruta corregida para leer desde la carpeta de datos del proyecto
+    ruta_archivo_iva = os.path.join(DATOS_DIR, 'data_iva.xlsx')
+    
+    if not os.path.exists(ruta_archivo_iva):
+        print(f"ERROR CRÍTICO: No se encontró el archivo de datos del IVA en la ruta: {ruta_archivo_iva}")
+        print("Por favor, asegúrese de que el archivo 'data_iva.xlsx' se encuentre en la carpeta 'datos' del proyecto.")
+        return None # Retornar None si el archivo no existe
+
+    df_iva = pd.read_excel(ruta_archivo_iva)
     
     # Mostrar las primeras filas para entender la estructura
     print("Primeras filas de datos IVA:")
@@ -91,9 +108,9 @@ def cargar_datos_iva():
     ax_iva.xaxis.set_major_locator(mdates.YearLocator(2))
     ax_iva.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     plt.tight_layout()
-    plt.savefig('../visualizaciones/iva_datos_crudos.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'iva_datos_crudos.png'), dpi=300)
     plt.close(fig_iva)
-    print("Visualización de datos crudos de IVA guardada en ../visualizaciones/iva_datos_crudos.png")
+    print(f"Visualización de datos crudos de IVA guardada en {os.path.join(VISUALIZACIONES_DIR, 'iva_datos_crudos.png')}")
     
     return df_iva
 
@@ -104,13 +121,13 @@ def cargar_datos_pib():
     print("Cargando datos de PIB...")
     
     # Cargar datos anuales
-    df_pib_anual = pd.read_csv('../datos/pib_anual_colombia.csv')
+    df_pib_anual = pd.read_csv(os.path.join(DATOS_DIR, 'pib_anual_colombia.csv'))
     
     # Cargar datos trimestrales
-    df_pib_trimestral = pd.read_csv('../datos/pib_trimestral_colombia.csv')
+    df_pib_trimestral = pd.read_csv(os.path.join(DATOS_DIR, 'pib_trimestral_colombia.csv'))
     
     # Cargar datos mensuales
-    df_pib_mensual = pd.read_csv('../datos/pib_mensual_colombia.csv')
+    df_pib_mensual = pd.read_csv(os.path.join(DATOS_DIR, 'pib_mensual_colombia.csv'))
     
     # Mostrar las primeras filas para entender la estructura
     print("Primeras filas de datos PIB mensual:")
@@ -137,9 +154,9 @@ def cargar_datos_pib():
     ax_pib.xaxis.set_major_locator(mdates.YearLocator(2))
     ax_pib.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     plt.tight_layout()
-    plt.savefig('../visualizaciones/pib_mensual_datos_crudos.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'pib_mensual_datos_crudos.png'), dpi=300)
     plt.close(fig_pib)
-    print("Visualización de datos crudos de PIB mensual guardada en ../visualizaciones/pib_mensual_datos_crudos.png")
+    print(f"Visualización de datos crudos de PIB mensual guardada en {os.path.join(VISUALIZACIONES_DIR, 'pib_mensual_datos_crudos.png')}")
     
     return df_pib_anual, df_pib_trimestral, df_pib_mensual
 
@@ -195,7 +212,7 @@ def estandarizar_y_alinear_series(df_iva, df_pib_mensual):
         print(f"DataFrame después de eliminar valores faltantes: {len(df_conjunto)} registros")
     
     # Guardar DataFrame alineado
-    df_conjunto.to_csv('../datos/iva_pib_alineado.csv')
+    df_conjunto.to_csv(os.path.join(DATOS_DIR, 'iva_pib_alineado.csv'))
     
     print(f"Series alineadas con éxito: {len(df_conjunto)} registros mensuales")
     
@@ -225,7 +242,7 @@ def estandarizar_y_alinear_series(df_iva, df_pib_mensual):
         ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
         
         plt.tight_layout()
-        plt.savefig('../visualizaciones/series_alineadas.png', dpi=300)
+        plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'series_alineadas.png'), dpi=300)
         
         # Calcular correlación
         correlacion = df_conjunto['iva'].corr(df_conjunto['pib_usd'])
@@ -269,7 +286,7 @@ def estandarizar_y_alinear_series(df_iva, df_pib_mensual):
             df_comun.set_index('fecha', inplace=True)
             
             # Guardar DataFrame con registros comunes
-            df_comun.to_csv('../datos/iva_pib_alineado.csv')
+            df_comun.to_csv(os.path.join(DATOS_DIR, 'iva_pib_alineado.csv'))
             
             print(f"Series alineadas manualmente con éxito: {len(df_comun)} registros mensuales")
             print(f"Periodo final: {df_comun.index.min().strftime('%Y-%m-%d')} a {df_comun.index.max().strftime('%Y-%m-%d')}")
@@ -297,7 +314,7 @@ def estandarizar_y_alinear_series(df_iva, df_pib_mensual):
             ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
             
             plt.tight_layout()
-            plt.savefig('../visualizaciones/series_alineadas_manual.png', dpi=300)
+            plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'series_alineadas_manual.png'), dpi=300)
             
             # Calcular correlación
             correlacion = df_comun['iva'].corr(df_comun['pib'])
@@ -316,6 +333,13 @@ def main():
     
     # Cargar datos
     df_iva = cargar_datos_iva()
+    
+    # Si df_iva es None (porque el archivo no se encontró), detener la ejecución o manejar el error.
+    if df_iva is None:
+        print("\nERROR CRÍTICO EN MAIN: No se pudieron cargar los datos del IVA. Revisar mensajes anteriores.")
+        print("La alineación de series no puede continuar.")
+        return
+
     df_pib_anual, df_pib_trimestral, df_pib_mensual = cargar_datos_pib()
     
     # Estandarizar y alinear series
@@ -323,8 +347,12 @@ def main():
     
     if df_conjunto is not None and len(df_conjunto) > 0:
         print("\nEstandarización y alineación de series temporales completada con éxito.")
-        print(f"DataFrame conjunto guardado en: ../datos/iva_pib_alineado.csv")
-        print(f"Visualización guardada en: ../visualizaciones/series_alineadas.png")
+        print(f"DataFrame conjunto guardado en: {os.path.join(DATOS_DIR, 'iva_pib_alineado.csv')}")
+        # Determinar si se usó la alineación manual para el mensaje de la visualización
+        if os.path.exists(os.path.join(VISUALIZACIONES_DIR, 'series_alineadas_manual.png')) and not os.path.exists(os.path.join(VISUALIZACIONES_DIR, 'series_alineadas.png')):
+             print(f"Visualización guardada en: {os.path.join(VISUALIZACIONES_DIR, 'series_alineadas_manual.png')}")
+        else:
+             print(f"Visualización guardada en: {os.path.join(VISUALIZACIONES_DIR, 'series_alineadas.png')}")
     else:
         print("\nERROR: No se pudo completar la alineación de series temporales.")
 
