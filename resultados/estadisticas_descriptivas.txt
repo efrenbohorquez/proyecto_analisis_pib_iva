@@ -1,0 +1,23 @@
+Estadísticas Descriptivas - IVA
+===============================
+count    3.000000e+02
+mean     8.978370e+06
+std      6.449841e+06
+min      1.300336e+06
+25%      3.966657e+06
+50%      7.004803e+06
+75%      1.291575e+07
+max      3.156999e+07
+Name: iva, dtype: float64
+
+Estadísticas Descriptivas - PIB
+===============================
+count    3.000000e+02
+mean     2.147333e+10
+std      8.597236e+09
+min      6.688000e+09
+25%      1.303780e+10
+50%      2.348800e+10
+75%      2.800560e+10
+max      4.043200e+10
+Name: pib_usd, dtype: float64

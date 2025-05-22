@@ -1,0 +1,16 @@
+PRUEBAS DE ESTACIONARIEDAD
+=========================
+
+SERIE IVA ORIGINAL
+Prueba ADF - Estadístico: 1.0189, Valor p: 0.9945
+Prueba KPSS - Estadístico: 2.5163, Valor p: 0.0100
+
+SERIE PIB ORIGINAL
+Prueba ADF - Estadístico: -1.4898, Valor p: 0.5386
+Prueba KPSS - Estadístico: 2.1899, Valor p: 0.0100
+
+SERIE IVA DIFERENCIADA
+Prueba ADF - Estadístico: -4.3303, Valor p: 0.0004
+
+SERIE PIB DIFERENCIADA
+Prueba ADF - Estadístico: -3.3372, Valor p: 0.0133

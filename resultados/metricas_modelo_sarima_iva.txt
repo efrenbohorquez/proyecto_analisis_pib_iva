@@ -1,0 +1,6 @@
+EVALUACIÓN DEL MODELO SARIMA PARA IVA
+=====================================
+
+RMSE: 4941348.66
+MAE: 3036037.42
+MAPE: 15.57%

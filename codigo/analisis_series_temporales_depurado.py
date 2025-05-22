@@ -33,6 +33,7 @@ import os
 from datetime import datetime
 import matplotlib.dates as mdates
 from matplotlib.ticker import FuncFormatter
+import joblib # Para guardar modelos
 
 # Configuración para ignorar advertencias
 warnings.filterwarnings('ignore')
@@ -49,9 +50,17 @@ plt.rcParams['legend.fontsize'] = 10
 plt.rcParams['figure.titlesize'] = 16
 plt.rcParams['figure.figsize'] = (12, 8)
 
+# Obtener la ruta base del script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATOS_DIR = os.path.join(BASE_DIR, "..", "datos")
+VISUALIZACIONES_DIR = os.path.join(BASE_DIR, "..", "visualizaciones")
+RESULTADOS_DIR = os.path.join(BASE_DIR, "..", "resultados")
+MODELOS_DIR = os.path.join(BASE_DIR, "..", "modelos")
+
 # Crear directorios si no existen
-os.makedirs('../visualizaciones', exist_ok=True)
-os.makedirs('../resultados', exist_ok=True)
+os.makedirs(VISUALIZACIONES_DIR, exist_ok=True)
+os.makedirs(RESULTADOS_DIR, exist_ok=True)
+os.makedirs(MODELOS_DIR, exist_ok=True)
 
 # Función para formatear valores en miles de millones
 def formato_miles_millones(x, pos):
@@ -71,7 +80,8 @@ def cargar_datos_alineados():
     print("Cargando datos alineados de IVA y PIB...")
     
     # Cargar datos desde el archivo CSV
-    df_conjunto = pd.read_csv('../datos/iva_pib_alineado.csv')
+    file_path_alineado = os.path.join(DATOS_DIR, "iva_pib_alineado.csv")
+    df_conjunto = pd.read_csv(file_path_alineado)
     
     # Convertir columna de fecha a datetime y establecer como índice
     df_conjunto['fecha_estandar'] = pd.to_datetime(df_conjunto['fecha_estandar'])
@@ -94,7 +104,7 @@ def realizar_eda(df_conjunto):
     stats_pib = df_conjunto['pib_usd'].describe()
     
     # Guardar estadísticas descriptivas
-    with open('../resultados/estadisticas_descriptivas.txt', 'w') as f:
+    with open(os.path.join(RESULTADOS_DIR, 'estadisticas_descriptivas.txt'), 'w') as f:
         f.write("Estadísticas Descriptivas - IVA\n")
         f.write("===============================\n")
         f.write(str(stats_iva))
@@ -125,7 +135,7 @@ def realizar_eda(df_conjunto):
     ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     
     plt.tight_layout()
-    plt.savefig('../visualizaciones/series_temporales_iva_pib.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'series_temporales_iva_pib.png'), dpi=300)
     plt.close(fig)
     
     # Visualización 2: Gráfico de dispersión IVA vs PIB
@@ -140,7 +150,7 @@ def realizar_eda(df_conjunto):
     ax.yaxis.set_major_formatter(FuncFormatter(formato_millones))
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig('../visualizaciones/dispersion_iva_pib.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'dispersion_iva_pib.png'), dpi=300)
     plt.close(fig)
     
     # Visualización 3: Variación porcentual anual
@@ -159,7 +169,7 @@ def realizar_eda(df_conjunto):
     ax.grid(True, alpha=0.3)
     ax.legend()
     plt.tight_layout()
-    plt.savefig('../visualizaciones/variacion_porcentual_anual.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'variacion_porcentual_anual.png'), dpi=300)
     plt.close(fig)
     
     # Visualización 4: Estacionalidad mensual del IVA
@@ -183,7 +193,7 @@ def realizar_eda(df_conjunto):
     plt.ylabel('IVA Promedio (Millones de pesos)')
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig('../visualizaciones/estacionalidad_mensual_iva.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'estacionalidad_mensual_iva.png'), dpi=300)
     plt.close(fig)
     
     # Calcular correlación
@@ -191,7 +201,7 @@ def realizar_eda(df_conjunto):
     print(f"Correlación entre IVA y PIB: {correlacion:.4f}")
     
     # Guardar correlación
-    with open('../resultados/correlacion_iva_pib.txt', 'w') as f:
+    with open(os.path.join(RESULTADOS_DIR, 'correlacion_iva_pib.txt'), 'w') as f:
         f.write(f"Correlación entre IVA y PIB: {correlacion:.4f}")
     
     print("Análisis exploratorio completado.")
@@ -282,7 +292,7 @@ def pruebas_estacionariedad(df_conjunto):
     ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     
     plt.tight_layout()
-    plt.savefig('../visualizaciones/series_diferenciadas.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'series_diferenciadas.png'), dpi=300)
     plt.close(fig)
     
     # Pruebas para series diferenciadas
@@ -293,7 +303,7 @@ def pruebas_estacionariedad(df_conjunto):
     adf_pib_diff = test_adf(df_diff['pib_diff'], 'PIB diferenciado')
     
     # Guardar resultados
-    with open('../resultados/pruebas_estacionariedad.txt', 'w') as f:
+    with open(os.path.join(RESULTADOS_DIR, 'pruebas_estacionariedad.txt'), 'w') as f:
         f.write("PRUEBAS DE ESTACIONARIEDAD\n")
         f.write("=========================\n\n")
         
@@ -332,7 +342,7 @@ def pruebas_estacionariedad(df_conjunto):
         print(f"Conclusión: Las series no están cointegradas (no rechaza H0)")
     
     # Guardar resultados de cointegración
-    with open('../resultados/prueba_cointegracion.txt', 'w') as f:
+    with open(os.path.join(RESULTADOS_DIR, 'prueba_cointegracion.txt'), 'w') as f:
         f.write("PRUEBA DE COINTEGRACIÓN\n")
         f.write("======================\n\n")
         f.write(f"Estadístico: {coint_result[0]:.4f}\n")
@@ -386,7 +396,7 @@ def descomponer_series(df_conjunto):
     axes[3].xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     
     plt.tight_layout()
-    plt.savefig('../visualizaciones/descomposicion_iva.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'descomposicion_iva.png'), dpi=300)
     plt.close(fig)
     
     # Descomposición de la serie de PIB
@@ -418,7 +428,7 @@ def descomponer_series(df_conjunto):
     axes[3].xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     
     plt.tight_layout()
-    plt.savefig('../visualizaciones/descomposicion_pib.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'descomposicion_pib.png'), dpi=300)
     plt.close(fig)
     
     # Guardar componentes
@@ -431,7 +441,7 @@ def descomponer_series(df_conjunto):
         'pib_residuo': descomp_pib.resid
     })
     
-    componentes.to_csv('../resultados/componentes_series.csv')
+    componentes.to_csv(os.path.join(RESULTADOS_DIR, 'componentes_series.csv'))
     
     print("Descomposición de series completada.")
     return descomp_iva, descomp_pib
@@ -462,7 +472,7 @@ def modelar_series(df_conjunto):
     ax2.set_title('Función de Autocorrelación Parcial (PACF) - IVA', fontweight='bold')
     
     plt.tight_layout()
-    plt.savefig('../visualizaciones/acf_pacf_iva.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'acf_pacf_iva.png'), dpi=300)
     plt.close(fig)
     
     # Modelado SARIMA para IVA
@@ -482,7 +492,7 @@ def modelar_series(df_conjunto):
         print(resultado_sarima_iva.summary())
         
         # Guardar resumen del modelo
-        with open('../resultados/resumen_modelo_sarima_iva.txt', 'w') as f:
+        with open(os.path.join(RESULTADOS_DIR, 'resumen_modelo_sarima_iva.txt'), 'w') as f:
             f.write(str(resultado_sarima_iva.summary()))
         
         # Pronóstico dentro de la muestra
@@ -536,7 +546,7 @@ def modelar_series(df_conjunto):
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
         
         plt.tight_layout()
-        plt.savefig('../visualizaciones/modelo_sarima_iva.png', dpi=300)
+        plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'modelo_sarima_iva.png'), dpi=300)
         plt.close(fig)
         
         # Evaluar modelo
@@ -562,7 +572,7 @@ def modelar_series(df_conjunto):
             print(f"MAPE: {mape_iva:.2f}%")
             
             # Guardar métricas
-            with open('../resultados/metricas_modelo_sarima_iva.txt', 'w') as f:
+            with open(os.path.join(RESULTADOS_DIR, 'metricas_modelo_sarima_iva.txt'), 'w') as f:
                 f.write("EVALUACIÓN DEL MODELO SARIMA PARA IVA\n")
                 f.write("=====================================\n\n")
                 f.write(f"RMSE: {rmse_iva:.2f}\n")
@@ -570,7 +580,7 @@ def modelar_series(df_conjunto):
                 f.write(f"MAPE: {mape_iva:.2f}%\n")
         else:
             print("No hay suficientes datos para evaluar el modelo")
-            with open('../resultados/metricas_modelo_sarima_iva.txt', 'w') as f:
+            with open(os.path.join(RESULTADOS_DIR, 'metricas_modelo_sarima_iva.txt'), 'w') as f:
                 f.write("EVALUACIÓN DEL MODELO SARIMA PARA IVA\n")
                 f.write("=====================================\n\n")
                 f.write("No hay suficientes datos para evaluar el modelo\n")
@@ -607,20 +617,20 @@ def modelar_series(df_conjunto):
         axes[1, 1].grid(True, alpha=0.3)
         
         plt.tight_layout()
-        plt.savefig('../visualizaciones/diagnostico_residuos_sarima.png', dpi=300)
+        plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'diagnostico_residuos_sarima.png'), dpi=300)
         plt.close(fig)
         
         # Diagnóstico de residuos
         fig = resultado_sarima_iva.plot_diagnostics(figsize=(15, 12))
         fig.suptitle('Diagnóstico de Residuos del Modelo SARIMA para IVA', fontweight='bold', y=1.02)
         plt.tight_layout()
-        plt.savefig('../visualizaciones/diagnostico_residuos_sarima.png', dpi=300)
+        plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'diagnostico_residuos_sarima.png'), dpi=300)
         plt.close(fig)
 
     except Exception as e:
         print(f"Error en el modelado SARIMA: {e}")
         # Guardar error en archivo
-        with open('../resultados/error_modelado.txt', 'w') as f:
+        with open(os.path.join(RESULTADOS_DIR, 'error_modelado.txt'), 'w') as f:
             f.write(f"Error en el modelado SARIMA: {e}\n")
             f.write("No se pudo completar el modelado SARIMA ni las pruebas dependientes.")
         # Continuar con el resto del script si es posible, o manejar el error
@@ -655,7 +665,7 @@ def modelar_series(df_conjunto):
                                                                         maxlag=max_lags, verbose=False)
                         
                         # Guardar resultados de causalidad de Granger
-                        with open('../resultados/causalidad_granger.txt', 'w') as f:
+                        with open(os.path.join(RESULTADOS_DIR, 'causalidad_granger.txt'), 'w') as f:
                             f.write("PRUEBA DE CAUSALIDAD DE GRANGER\n")
                             f.write("==============================\n\n")
                             f.write("Hipótesis: PIB no causa IVA\n")
@@ -672,24 +682,24 @@ def modelar_series(df_conjunto):
                         print("Prueba de causalidad de Granger completada.")
                     else:
                         print("No hay suficientes datos para la prueba de Granger después de la limpieza.")
-                        with open('../resultados/causalidad_granger.txt', 'w') as f:
+                        with open(os.path.join(RESULTADOS_DIR, 'causalidad_granger.txt'), 'w') as f:
                             f.write("No hay suficientes datos para la prueba de Granger después de la limpieza.")
                 else:
                     print("No hay suficientes datos para la prueba de Granger después de la conversión y limpieza.")
-                    with open('../resultados/causalidad_granger.txt', 'w') as f:
+                    with open(os.path.join(RESULTADOS_DIR, 'causalidad_granger.txt'), 'w') as f:
                         f.write("No hay suficientes datos para la prueba de Granger después de la conversión y limpieza.")
 
             except Exception as e_granger:
                 print(f"Error en la prueba de causalidad de Granger: {e_granger}")
-                with open('../resultados/causalidad_granger.txt', 'w') as f:
+                with open(os.path.join(RESULTADOS_DIR, 'causalidad_granger.txt'), 'w') as f:
                     f.write(f"Error en la prueba de causalidad de Granger: {e_granger}\n")
         else:
             print("No hay suficientes datos o datos vacíos para la prueba de Granger.")
-            with open('../resultados/causalidad_granger.txt', 'w') as f:
+            with open(os.path.join(RESULTADOS_DIR, 'causalidad_granger.txt'), 'w') as f:
                 f.write("No hay suficientes datos o datos vacíos para la prueba de Granger.\n")
     else:
         print("Modelado SARIMA falló, omitiendo prueba de causalidad de Granger.")
-        with open('../resultados/causalidad_granger.txt', 'w') as f:
+        with open(os.path.join(RESULTADOS_DIR, 'causalidad_granger.txt'), 'w') as f:
             f.write("Modelado SARIMA falló, omitiendo prueba de causalidad de Granger.\n")
 
     print("Modelado de series temporales completado.")

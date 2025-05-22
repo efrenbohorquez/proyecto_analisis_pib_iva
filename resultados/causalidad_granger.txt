@@ -1,0 +1,30 @@
+PRUEBA DE CAUSALIDAD DE GRANGER
+==============================
+
+Hipótesis: PIB no causa IVA
+Lag 1: Estadístico F = 0.5017, Valor p = 0.4793
+Lag 2: Estadístico F = 30.8011, Valor p = 0.0000
+Lag 3: Estadístico F = 25.3920, Valor p = 0.0000
+Lag 4: Estadístico F = 25.0177, Valor p = 0.0000
+Lag 5: Estadístico F = 19.9119, Valor p = 0.0000
+Lag 6: Estadístico F = 17.2080, Valor p = 0.0000
+Lag 7: Estadístico F = 21.2288, Valor p = 0.0000
+Lag 8: Estadístico F = 44.7431, Valor p = 0.0000
+Lag 9: Estadístico F = 39.3113, Valor p = 0.0000
+Lag 10: Estadístico F = 50.6812, Valor p = 0.0000
+Lag 11: Estadístico F = 20.2853, Valor p = 0.0000
+Lag 12: Estadístico F = 2.2175, Valor p = 0.0114
+
+Hipótesis: IVA no causa PIB
+Lag 1: Estadístico F = 36.3394, Valor p = 0.0000
+Lag 2: Estadístico F = 43.3293, Valor p = 0.0000
+Lag 3: Estadístico F = 38.9643, Valor p = 0.0000
+Lag 4: Estadístico F = 38.6484, Valor p = 0.0000
+Lag 5: Estadístico F = 31.7041, Valor p = 0.0000
+Lag 6: Estadístico F = 28.7862, Valor p = 0.0000
+Lag 7: Estadístico F = 48.2956, Valor p = 0.0000
+Lag 8: Estadístico F = 43.7188, Valor p = 0.0000
+Lag 9: Estadístico F = 41.0298, Valor p = 0.0000
+Lag 10: Estadístico F = 35.4750, Valor p = 0.0000
+Lag 11: Estadístico F = 11.7469, Valor p = 0.0000
+Lag 12: Estadístico F = 9.8411, Valor p = 0.0000
