@@ -16,16 +16,16 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, GRU, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
-import warnings
-import os
 from datetime import datetime
-import matplotlib.dates as mdates
 from matplotlib.ticker import FuncFormatter
+import matplotlib.dates as mdates # Asegurarse de que mdates está importado
+import warnings
 
 # Configuración para ignorar advertencias
 warnings.filterwarnings('ignore')
@@ -42,10 +42,17 @@ plt.rcParams['legend.fontsize'] = 10
 plt.rcParams['figure.titlesize'] = 16
 plt.rcParams['figure.figsize'] = (12, 8)
 
+# Obtener la ruta base del script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATOS_DIR = os.path.join(BASE_DIR, "..", "datos")
+VISUALIZACIONES_DIR = os.path.join(BASE_DIR, "..", "visualizaciones")
+RESULTADOS_DIR = os.path.join(BASE_DIR, "..", "resultados")
+MODELOS_DIR = os.path.join(BASE_DIR, "..", "modelos")
+
 # Crear directorios si no existen
-os.makedirs('../visualizaciones', exist_ok=True)
-os.makedirs('../resultados', exist_ok=True)
-os.makedirs('../modelos', exist_ok=True)
+os.makedirs(VISUALIZACIONES_DIR, exist_ok=True)
+os.makedirs(RESULTADOS_DIR, exist_ok=True)
+os.makedirs(MODELOS_DIR, exist_ok=True)
 
 # Función para formatear valores en millones
 def formato_millones(x, pos):
@@ -60,11 +67,22 @@ def cargar_datos_alineados():
     print("Cargando datos alineados de IVA y PIB...")
     
     # Cargar datos desde el archivo CSV
-    df_conjunto = pd.read_csv('../datos/iva_pib_alineado.csv')
+    file_path_alineado = os.path.join(DATOS_DIR, "iva_pib_alineado.csv")
+    df_conjunto = pd.read_csv(file_path_alineado)
     
     # Convertir columna de fecha a datetime y establecer como índice
-    df_conjunto['fecha_estandar'] = pd.to_datetime(df_conjunto['fecha_estandar'])
-    df_conjunto.set_index('fecha_estandar', inplace=True)
+    # Asegurarse de que la columna de fecha se llama 'Fecha' como en los datos alineados
+    if 'Fecha' in df_conjunto.columns:
+        df_conjunto['Fecha'] = pd.to_datetime(df_conjunto['Fecha'])
+        df_conjunto.set_index('Fecha', inplace=True)
+    elif 'fecha_estandar' in df_conjunto.columns: # Fallback por si el nombre es diferente
+        df_conjunto['fecha_estandar'] = pd.to_datetime(df_conjunto['fecha_estandar'])
+        df_conjunto.set_index('fecha_estandar', inplace=True)
+    else:
+        raise KeyError("No se encontró la columna de fecha ('Fecha' o 'fecha_estandar') en el archivo iva_pib_alineado.csv")
+
+    # Asegurarse de que el índice sea un DatetimeIndex con frecuencia mensual
+    df_conjunto = df_conjunto.asfreq('MS')
     
     print(f"Datos alineados cargados: {len(df_conjunto)} registros mensuales")
     print(f"Periodo: {df_conjunto.index.min().strftime('%Y-%m')} a {df_conjunto.index.max().strftime('%Y-%m')}")
@@ -195,7 +213,7 @@ def entrenar_evaluar_rnn(df_conjunto, ventana=12, epocas=100, batch_size=32):
     )
     
     # Guardar modelo
-    modelo_lstm.save('../modelos/modelo_lstm_iva.h5')
+    modelo_lstm.save(os.path.join(MODELOS_DIR, 'modelo_lstm_iva.h5'))
     
     # Crear y entrenar modelo GRU
     print("Entrenando modelo GRU...")
@@ -212,7 +230,7 @@ def entrenar_evaluar_rnn(df_conjunto, ventana=12, epocas=100, batch_size=32):
     )
     
     # Guardar modelo
-    modelo_gru.save('../modelos/modelo_gru_iva.h5')
+    modelo_gru.save(os.path.join(MODELOS_DIR, 'modelo_gru_iva.h5'))
     
     # Evaluar modelos
     # Predicciones LSTM
@@ -246,7 +264,7 @@ def entrenar_evaluar_rnn(df_conjunto, ventana=12, epocas=100, batch_size=32):
     print(f"MAPE: {mape_gru:.2f}%")
     
     # Guardar métricas
-    with open('../resultados/metricas_redes_neuronales.txt', 'w') as f:
+    with open(os.path.join(RESULTADOS_DIR, 'metricas_redes_neuronales.txt'), 'w') as f:
         f.write("EVALUACIÓN DE MODELOS DE REDES NEURONALES\n")
         f.write("========================================\n\n")
         f.write("Modelo LSTM\n")
@@ -283,7 +301,7 @@ def entrenar_evaluar_rnn(df_conjunto, ventana=12, epocas=100, batch_size=32):
     ax2.legend()
     
     plt.tight_layout()
-    plt.savefig('../visualizaciones/historia_entrenamiento_rnn.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'historia_entrenamiento_rnn.png'), dpi=300)
     plt.close(fig)
     
     # Visualizar predicciones
@@ -315,7 +333,7 @@ def entrenar_evaluar_rnn(df_conjunto, ventana=12, epocas=100, batch_size=32):
     plt.xticks(rotation=45)
     
     plt.tight_layout()
-    plt.savefig('../visualizaciones/predicciones_rnn.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'predicciones_rnn.png'), dpi=300)
     plt.close(fig)
     
     # Realizar predicciones futuras (próximos 12 meses)
@@ -389,7 +407,7 @@ def entrenar_evaluar_rnn(df_conjunto, ventana=12, epocas=100, batch_size=32):
     plt.xticks(rotation=45)
     
     plt.tight_layout()
-    plt.savefig('../visualizaciones/pronostico_futuro_rnn.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'pronostico_futuro_rnn.png'), dpi=300)
     plt.close(fig)
     
     # Guardar predicciones futuras
@@ -399,7 +417,7 @@ def entrenar_evaluar_rnn(df_conjunto, ventana=12, epocas=100, batch_size=32):
         'pronostico_gru': predicciones_futuras_gru.flatten()
     })
     df_pronostico.set_index('fecha', inplace=True)
-    df_pronostico.to_csv('../resultados/pronostico_futuro_rnn.csv')
+    df_pronostico.to_csv(os.path.join(RESULTADOS_DIR, 'pronostico_futuro_rnn.csv'))
     
     print("Entrenamiento y evaluación de redes neuronales completado.")
     
@@ -432,18 +450,47 @@ def comparar_modelos(df_conjunto, resultados_rnn):
     
     # Cargar métricas de SARIMA
     try:
-        with open('../resultados/metricas_modelo_sarima_iva.txt', 'r') as f:
+        # Corregir el nombre del archivo de métricas SARIMA si es necesario
+        metricas_sarima_path = os.path.join(RESULTADOS_DIR, 'metricas_modelo_sarima_iva.txt')
+        if not os.path.exists(metricas_sarima_path):
+             # Intentar con el nombre que podría estar usando el otro script
+            metricas_sarima_path = os.path.join(RESULTADOS_DIR, 'resumen_modelo_sarima_iva.txt') # o el nombre correcto
+
+        with open(metricas_sarima_path, 'r') as f:
             contenido = f.read()
             
-            # Extraer métricas
-            rmse_sarima = float(contenido.split('RMSE: ')[1].split('\n')[0])
-            mae_sarima = float(contenido.split('MAE: ')[1].split('\n')[0])
-            mape_sarima = float(contenido.split('MAPE: ')[1].split('%')[0])
-    except:
-        print("No se encontraron métricas de SARIMA. Usando valores predeterminados.")
+            # Extraer métricas (ajustar según el formato real del archivo)
+            # Esto es una suposición, el parseo puede necesitar ajustes
+            try:
+                rmse_sarima_str = contenido.split('RMSE:')[1].split('\n')[0].strip()
+                mae_sarima_str = contenido.split('MAE:')[1].split('\n')[0].strip()
+                mape_sarima_str = contenido.split('MAPE:')[1].split('%')[0].strip()
+                
+                rmse_sarima = float(rmse_sarima_str)
+                mae_sarima = float(mae_sarima_str)
+                mape_sarima = float(mape_sarima_str)
+            except IndexError: # Si el formato no es el esperado
+                 print(f"No se pudo parsear el archivo de métricas SARIMA: {metricas_sarima_path}. Usando valores predeterminados.")
+                 rmse_sarima = 5000000 
+                 mae_sarima = 3000000
+                 mape_sarima = 15.0
+            except ValueError: # Si la conversión a float falla
+                 print(f"Error al convertir a float las métricas SARIMA en: {metricas_sarima_path}. Usando valores predeterminados.")
+                 rmse_sarima = 5000000 
+                 mae_sarima = 3000000
+                 mape_sarima = 15.0
+
+
+    except FileNotFoundError:
+        print(f"No se encontró el archivo de métricas de SARIMA en {RESULTADOS_DIR}. Usando valores predeterminados.")
+        rmse_sarima = 5000000 # Valor alto por defecto
+        mae_sarima = 3000000  # Valor alto por defecto
+        mape_sarima = 15.0    # Valor por defecto
+    except Exception as e:
+        print(f"Error al cargar métricas de SARIMA: {e}. Usando valores predeterminados.")
         rmse_sarima = 5000000
         mae_sarima = 3000000
-        mape_sarima = 15
+        mape_sarima = 15.0
     
     # Extraer métricas de redes neuronales
     rmse_lstm = resultados_rnn['rmse_lstm']
@@ -482,7 +529,7 @@ def comparar_modelos(df_conjunto, resultados_rnn):
     ax3.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('../visualizaciones/comparacion_modelos.png', dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'comparacion_modelos.png'), dpi=300)
     plt.close(fig)
     
     # Guardar comparación
@@ -492,10 +539,10 @@ def comparar_modelos(df_conjunto, resultados_rnn):
         'MAE': mae_valores,
         'MAPE (%)': mape_valores
     })
-    df_comparacion.to_csv('../resultados/comparacion_modelos.csv', index=False)
+    df_comparacion.to_csv(os.path.join(RESULTADOS_DIR, 'comparacion_modelos.csv'), index=False)
     
     # Guardar análisis comparativo
-    with open('../resultados/analisis_comparativo.txt', 'w') as f:
+    with open(os.path.join(RESULTADOS_DIR, 'analisis_comparativo.txt'), 'w') as f:
         f.write("ANÁLISIS COMPARATIVO DE MODELOS\n")
         f.write("==============================\n\n")
         
@@ -555,7 +602,7 @@ def generar_documentacion():
     """
     print("Generando documentación técnica...")
     
-    with open('../resultados/documentacion_redes_neuronales.md', 'w') as f:
+    with open(os.path.join(RESULTADOS_DIR, 'documentacion_redes_neuronales.md'), 'w') as f:
         f.write("# Redes Neuronales para Series Temporales\n\n")
         
         f.write("## Introducción\n\n")

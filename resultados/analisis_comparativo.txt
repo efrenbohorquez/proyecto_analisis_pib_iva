@@ -1,0 +1,27 @@
+ANÁLISIS COMPARATIVO DE MODELOS
+==============================
+
+Comparación de Métricas
+---------------------
+Modelo         RMSE          MAE  MAPE (%)
+SARIMA 4.941349e+06 3.036037e+06 15.570000
+  LSTM 6.271482e+06 4.744685e+06 23.049284
+   GRU 7.745695e+06 5.999910e+06 28.026053
+
+Análisis de Resultados
+--------------------
+Mejor modelo según RMSE: SARIMA (4941348.66)
+Mejor modelo según MAE: SARIMA (3036037.42)
+Mejor modelo según MAPE: SARIMA (15.57%)
+
+Conclusiones
+-----------
+El modelo SARIMA supera a los demás en todas las métricas evaluadas.
+Los modelos tradicionales (SARIMA) superan a las redes neuronales en este conjunto de datos.
+
+Recomendaciones
+--------------
+1. Para predicciones a corto plazo (1-3 meses), se recomienda utilizar el modelo con menor MAPE.
+2. Para predicciones a mediano plazo (4-6 meses), se recomienda utilizar el modelo con menor RMSE.
+3. Para aplicaciones donde la interpretabilidad es importante, SARIMA ofrece ventajas sobre las redes neuronales.
+4. Para capturar patrones no lineales complejos, las redes neuronales (LSTM/GRU) pueden ser más adecuadas.

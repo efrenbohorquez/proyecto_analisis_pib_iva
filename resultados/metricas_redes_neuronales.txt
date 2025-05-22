@@ -1,0 +1,14 @@
+EVALUACIÓN DE MODELOS DE REDES NEURONALES
+========================================
+
+Modelo LSTM
+-----------
+RMSE: 6271481.96
+MAE: 4744684.76
+MAPE: 23.05%
+
+Modelo GRU
+----------
+RMSE: 7745694.72
+MAE: 5999910.47
+MAPE: 28.03%
