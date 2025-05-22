@@ -1,6 +1,9 @@
 EVALUACIÓN DEL MODELO SARIMA PARA IVA
 =====================================
 
-RMSE: 4941348.66
-MAE: 3036037.42
-MAPE: 15.57%
+AIC: 1097483.78
+BIC: 1097501.18
+RMSE (entrenamiento): 882287.77
+MAE (entrenamiento): 568189.02
+RMSE (prueba): 4610451.34
+MAE (prueba): 3476535.61

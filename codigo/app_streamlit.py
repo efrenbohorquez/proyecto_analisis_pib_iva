@@ -117,19 +117,34 @@ else:
     st.warning(f"No se encontró el archivo de componentes: {df_componentes_path}")
 
 # --- Sección de Modelado SARIMA ---
-st.header("5. Modelado SARIMA/SARIMAX (para IVA)") # Título actualizado
-st.markdown("Esta sección presenta los resultados del modelado de la serie temporal del IVA utilizando un enfoque SARIMA. Si se incluyeron variables exógenas (como el PIB) en el modelo, se trataría de un modelo SARIMAX.")
+st.header("5. Modelado SARIMA del IVA (Sin Variables Exógenas)") 
+st.markdown("Esta sección presenta los resultados del modelado de la serie temporal del IVA utilizando un enfoque SARIMA simple, sin incluir variables exógenas.")
 
 st.subheader("Análisis ACF y PACF para la serie de IVA")
 mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "acf_pacf_iva.png"), "Funciones de Autocorrelación (ACF y PACF) para IVA")
 
-st.subheader("Resultados del Modelo SARIMA/SARIMAX")
-st.text_area("Resumen del Modelo", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "resumen_modelo_sarima_iva.txt")), height=500)
-st.markdown("El resumen del modelo detalla los coeficientes estimados, errores estándar, y otras estadísticas relevantes. Si se usaron variables exógenas, sus coeficientes también aparecerán aquí.")
+st.subheader("Resultados del Modelo SARIMA")
+st.text_area("Resumen del Modelo SARIMA", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "resumen_modelo_sarima_iva.txt")), height=500)
 
-mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "modelo_sarima_iva.png"), "Ajuste y Pronóstico del Modelo SARIMA/SARIMAX para IVA")
-mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "diagnostico_residuos_sarima.png"), "Diagnóstico de Residuos del Modelo SARIMA/SARIMAX")
-st.text_area("Métricas de Desempeño del Modelo", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "metricas_modelo_sarima_iva.txt")), height=150)
+mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "modelo_sarima_iva.png"), "Ajuste y Pronóstico del Modelo SARIMA para IVA")
+mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "diagnostico_residuos_sarima.png"), "Diagnóstico de Residuos del Modelo SARIMA")
+st.text_area("Métricas de Desempeño del Modelo SARIMA", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "metricas_modelo_sarima_iva.txt")), height=150)
+
+# --- Nueva Sección de Modelado SARIMAX ---
+st.header("5.1. Modelado SARIMAX del IVA (con PIB como Variable Exógena)")
+st.markdown("Esta sección presenta los resultados del modelado de la serie temporal del IVA utilizando un enfoque SARIMAX, donde el PIB se incluye como una variable exógena para mejorar el pronóstico.")
+
+st.subheader("Resultados del Modelo SARIMAX")
+# No es necesario repetir ACF/PACF si es el mismo para la serie IVA original
+# st.subheader("Análisis ACF y PACF para la serie de IVA")
+# mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "acf_pacf_iva.png"), "Funciones de Autocorrelación (ACF y PACF) para IVA")
+
+st.text_area("Resumen del Modelo SARIMAX", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "resumen_modelo_sarimax_iva.txt")), height=500)
+st.markdown("El resumen del modelo SARIMAX detalla los coeficientes estimados, incluyendo el de la variable exógena (PIB), errores estándar, y otras estadísticas relevantes.")
+
+mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "modelo_sarimax_iva.png"), "Ajuste y Pronóstico del Modelo SARIMAX para IVA (con PIB exógeno)")
+mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "diagnostico_residuos_sarimax.png"), "Diagnóstico de Residuos del Modelo SARIMAX")
+st.text_area("Métricas de Desempeño del Modelo SARIMAX", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "metricas_modelo_sarimax_iva.txt")), height=150)
 
 st.subheader("Prueba de Causalidad de Granger")
 st.markdown("La prueba de causalidad de Granger se utiliza para determinar si una serie temporal es útil para pronosticar otra.")
@@ -153,8 +168,23 @@ else:
 
 # --- Sección de Análisis Comparativo ---
 st.header("7. Análisis Comparativo de Modelos")
-mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "comparacion_modelos.png"), "Comparación de Modelos (SARIMA, LSTM, GRU)")
-st.text_area("Conclusiones del Análisis Comparativo", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "analisis_comparativo.txt")), height=300)
+st.markdown("Esta sección compara el rendimiento de los diferentes modelos de series temporales implementados para el pronóstico del IVA.")
+
+mostrar_imagen(os.path.join(RUTA_VISUALIZACIONES, "comparacion_modelos.png"), "Comparación Gráfica de Modelos (SARIMA, SARIMAX)")
+
+st.subheader("Tabla Comparativa de Métricas")
+comparacion_csv_path = os.path.join(RUTA_RESULTADOS, "comparacion_modelos.csv")
+if os.path.exists(comparacion_csv_path):
+    df_comparacion = pd.read_csv(comparacion_csv_path)
+    st.write("Métricas de los modelos evaluados:")
+    st.dataframe(df_comparacion)
+else:
+    st.warning(f"No se encontró el archivo de comparación de modelos: {comparacion_csv_path}")
+
+st.subheader("Conclusiones del Análisis Comparativo") # Mantenido como subheader
+# El archivo analisis_comparativo.txt parece ser estático, así que se muestra como está.
+# Si se quisiera un resumen dinámico, se necesitaría generar ese texto en el script de análisis.
+st.text_area("Conclusiones Generales", leer_archivo_texto(os.path.join(RUTA_RESULTADOS, "analisis_comparativo.txt")), height=300)
 
 # --- Información Adicional ---
 st.sidebar.header("Sobre el Proyecto")

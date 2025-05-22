@@ -1,0 +1,9 @@
+EVALUACIÓN DEL MODELO SARIMAX IVA CON PIB EXÓGENO
+=====================================
+
+AIC: 7911.36
+BIC: 7932.25
+RMSE (entrenamiento): 957585.03
+MAE (entrenamiento): 630928.10
+RMSE (prueba): 6441744.45
+MAE (prueba): 5130518.33

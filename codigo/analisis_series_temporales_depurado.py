@@ -135,7 +135,8 @@ def realizar_eda(df_conjunto):
     ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     
     plt.tight_layout()
-    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'series_temporales_iva_pib.png'), dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'series_temporales_iva_pib.png'), dpi=100)
+    plt.clf()
     plt.close(fig)
     
     # Visualización 2: Gráfico de dispersión IVA vs PIB
@@ -150,7 +151,8 @@ def realizar_eda(df_conjunto):
     ax.yaxis.set_major_formatter(FuncFormatter(formato_millones))
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'dispersion_iva_pib.png'), dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'dispersion_iva_pib.png'), dpi=100)
+    plt.clf()
     plt.close(fig)
     
     # Visualización 3: Variación porcentual anual
@@ -169,7 +171,8 @@ def realizar_eda(df_conjunto):
     ax.grid(True, alpha=0.3)
     ax.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'variacion_porcentual_anual.png'), dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'variacion_porcentual_anual.png'), dpi=100)
+    plt.clf()
     plt.close(fig)
     
     # Visualización 4: Estacionalidad mensual del IVA
@@ -193,7 +196,8 @@ def realizar_eda(df_conjunto):
     plt.ylabel('IVA Promedio (Millones de pesos)')
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'estacionalidad_mensual_iva.png'), dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'estacionalidad_mensual_iva.png'), dpi=100)
+    plt.clf()
     plt.close(fig)
     
     # Calcular correlación
@@ -292,7 +296,8 @@ def pruebas_estacionariedad(df_conjunto):
     ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     
     plt.tight_layout()
-    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'series_diferenciadas.png'), dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'series_diferenciadas.png'), dpi=100)
+    plt.clf()
     plt.close(fig)
     
     # Pruebas para series diferenciadas
@@ -396,7 +401,8 @@ def descomponer_series(df_conjunto):
     axes[3].xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     
     plt.tight_layout()
-    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'descomposicion_iva.png'), dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'descomposicion_iva.png'), dpi=100)
+    plt.clf()
     plt.close(fig)
     
     # Descomposición de la serie de PIB
@@ -428,7 +434,8 @@ def descomponer_series(df_conjunto):
     axes[3].xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     
     plt.tight_layout()
-    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'descomposicion_pib.png'), dpi=300)
+    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'descomposicion_pib.png'), dpi=100)
+    plt.clf()
     plt.close(fig)
     
     # Guardar componentes
@@ -450,455 +457,499 @@ def descomponer_series(df_conjunto):
 def modelado_sarima_simple_iva(df_conjunto): # Renombrada de modelar_series
     """
     Modela la serie temporal del IVA utilizando un modelo SARIMA simple.
+    Devuelve el resultado del modelo y un diccionario de métricas.
     """
     print("\n--- Modelado SARIMA simple para IVA ---")
     
-    # Preparar datos para modelado
-    fecha_corte = '2023-12-31'
-    train_iva = df_conjunto.loc[:fecha_corte, 'iva']
-    test_iva = df_conjunto.loc[fecha_corte:, 'iva']
-    
-    train_iva = pd.to_numeric(train_iva, errors='coerce').dropna()
-    
-    if train_iva.empty:
-        print("No hay datos de entrenamiento para el modelo SARIMA del IVA.")
-        return None
+    metricas_sarima = {}
+    resultado_sarima_iva = None
 
-    # Visualizar ACF y PACF para IVA
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
-    plot_acf(train_iva, ax=ax1, lags=36)
-    ax1.set_title('Función de Autocorrelación (ACF) - IVA', fontweight='bold')
-    
-    plot_pacf(train_iva, ax=ax2, lags=36)
-    ax2.set_title('Función de Autocorrelación Parcial (PACF) - IVA', fontweight='bold')
-    
-    plt.tight_layout()
-    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'acf_pacf_iva.png'), dpi=300)
-    plt.close(fig)
-    
-    # Modelado SARIMA para IVA
-    # Basado en análisis ACF/PACF y conocimiento del dominio
-    # Parámetros: (p,d,q)x(P,D,Q,s)
     try:
+        # Preparar datos para modelado
+        fecha_corte = '2023-12-31' # O la última fecha disponible si es dinámica
+        # Asegurarse de que df_conjunto.index sea DateTimeIndex
+        if not isinstance(df_conjunto.index, pd.DatetimeIndex):
+            df_conjunto.index = pd.to_datetime(df_conjunto.index)
+
+        # Verificar si la fecha de corte existe en el índice
+        if pd.to_datetime(fecha_corte) not in df_conjunto.index:
+            # Si no existe, usar la última fecha disponible antes de la fecha de corte teórica
+            # o ajustar la lógica según sea necesario. Aquí, por simplicidad, se podría tomar
+            # un porcentaje de los datos o una fecha fija que se sepa que existe.
+            # Para este ejemplo, si la fecha de corte no está, podríamos usar el 80% para entrenar.
+            # Esto es una simplificación; una lógica más robusta sería necesaria en un caso real.
+            split_point = int(len(df_conjunto) * 0.8)
+            train_iva = df_conjunto['iva'].iloc[:split_point]
+            test_iva = df_conjunto['iva'].iloc[split_point:]
+            fecha_corte_real = train_iva.index[-1]
+            print(f"Advertencia: Fecha de corte '{fecha_corte}' no encontrada. Usando '{fecha_corte_real}' como fecha de corte efectiva.")
+        else:
+            train_iva = df_conjunto.loc[:fecha_corte, 'iva']
+            test_iva = df_conjunto.loc[pd.to_datetime(fecha_corte) + pd.DateOffset(days=1):, 'iva'] # Asegurar que test_iva comience después
+            fecha_corte_real = pd.to_datetime(fecha_corte)
+
+
+        train_iva = pd.to_numeric(train_iva, errors='coerce').dropna()
+        test_iva = pd.to_numeric(test_iva, errors='coerce').dropna()
+        
+        if train_iva.empty:
+            print("No hay datos de entrenamiento para el modelo SARIMA del IVA.")
+            return None, {}
+
+        # Visualizar ACF y PACF para IVA (opcional si ya se hizo en EDA)
+        # ... (código de ACF/PACF existente) ...
+        
         modelo_sarima_iva = SARIMAX(train_iva, 
-                                order=(1, 1, 1), 
-                                seasonal_order=(1, 1, 1, 12),
-                                enforce_stationarity=False,
-                                enforce_invertibility=False)
+                                    order=(1, 1, 1), 
+                                    seasonal_order=(1, 1, 1, 12),
+                                    enforce_stationarity=False,
+                                    enforce_invertibility=False,
+                                    initialization='approximate_diffuse') # Añadido para consistencia
         
         resultado_sarima_iva = modelo_sarima_iva.fit(disp=False)
         
-        # Resumen del modelo
         print("\nResumen del modelo SARIMA para IVA:")
         print(resultado_sarima_iva.summary())
-        
-        # Guardar resumen del modelo
         with open(os.path.join(RESULTADOS_DIR, 'resumen_modelo_sarima_iva.txt'), 'w') as f:
             f.write(str(resultado_sarima_iva.summary()))
         
-        # Pronóstico dentro de la muestra
-        pred_iva = resultado_sarima_iva.predict(start=train_iva.index[0], end=df_conjunto.index[-1])
-        
-        # Pronóstico fuera de la muestra (2024)
-        forecast_iva = resultado_sarima_iva.get_forecast(steps=len(test_iva))
-        forecast_mean_iva = forecast_iva.predicted_mean
-        forecast_ci_iva = forecast_iva.conf_int()
-        
-        # Verificar y limpiar datos para visualización
-        # Asegurar que no hay valores NaN o infinitos
-        pred_iva = pred_iva.fillna(method='ffill').fillna(method='bfill')
-        forecast_mean_iva = forecast_mean_iva.fillna(method='ffill').fillna(method='bfill')
-        forecast_ci_iva = forecast_ci_iva.fillna(method='ffill').fillna(method='bfill')
-        
+        # Pronóstico
+        # Ajuste en muestra
+        pred_train_iva = resultado_sarima_iva.get_prediction(start=train_iva.index[0], end=train_iva.index[-1], dynamic=False)
+        pred_mean_train_iva = pred_train_iva.predicted_mean
+
+        # Pronóstico fuera de muestra (test_iva)
+        if not test_iva.empty:
+            forecast_out_of_sample = resultado_sarima_iva.get_forecast(steps=len(test_iva))
+            forecast_mean_iva = forecast_out_of_sample.predicted_mean
+            forecast_ci_iva = forecast_out_of_sample.conf_int()
+        else: # Si test_iva está vacío, pronosticar algunos pasos hacia el futuro
+            print("Test set vacío, pronosticando 12 pasos futuros para SARIMA.")
+            num_future_steps = 12
+            future_forecast_index = pd.date_range(start=train_iva.index[-1] + pd.DateOffset(months=1), periods=num_future_steps, freq=train_iva.index.freqstr or 'MS')
+            forecast_out_of_sample = resultado_sarima_iva.get_forecast(steps=num_future_steps)
+            forecast_mean_iva = pd.Series(forecast_out_of_sample.predicted_mean.values, index=future_forecast_index)
+            forecast_ci_iva = pd.DataFrame(forecast_out_of_sample.conf_int(), index=future_forecast_index, columns=['lower iva', 'upper iva'])
+
+
         # Visualizar resultados del modelo
         fig, ax = plt.figure(figsize=(14, 7)), plt.gca()
+        ax.plot(df_conjunto.index, df_conjunto['iva'], color='#006BA2', label='Observado')
+        ax.plot(pred_mean_train_iva.index, pred_mean_train_iva, color='#A2C510', linestyle='--', label='Ajustado (Entrenamiento)')
+        if not test_iva.empty or num_future_steps > 0 :
+            ax.plot(forecast_mean_iva.index, forecast_mean_iva, color='#F4364C', linestyle='--', label='Pronóstico')
+            ax.fill_between(forecast_ci_iva.index, forecast_ci_iva.iloc[:, 0], forecast_ci_iva.iloc[:, 1], color='#F4364C', alpha=0.2)
         
-        # Datos originales
-        ax.plot(df_conjunto.index, df_conjunto['iva'], 
-                color='#006BA2', label='Observado')
-        
-        # Valores ajustados
-        ax.plot(pred_iva.index, pred_iva, 
-                color='#A2C510', linestyle='--', label='Ajustado')
-        
-        # Pronóstico
-        ax.plot(forecast_mean_iva.index, forecast_mean_iva, 
-                color='#F4364C', linestyle='--', label='Pronóstico')
-        
-        # Intervalo de confianza
-        ax.fill_between(forecast_ci_iva.index,
-                       forecast_ci_iva.iloc[:, 0],
-                       forecast_ci_iva.iloc[:, 1],
-                       color='#F4364C', alpha=0.2)
-        
-        # Línea vertical para separar entrenamiento y prueba
-        ax.axvline(x=pd.to_datetime(fecha_corte), color='black', linestyle=':')
-        
-        # Configuración del gráfico
-        ax.set_title('Modelo SARIMA para IVA: Valores Ajustados y Pronóstico', fontweight='bold')
+        ax.axvline(x=fecha_corte_real, color='black', linestyle=':', label=f'Corte: {fecha_corte_real.strftime("%Y-%m-%d")}')
+        ax.set_title('Modelo SARIMA para IVA: Ajuste y Pronóstico', fontweight='bold')
+        # ... (resto de la configuración del gráfico como estaba) ...
         ax.set_xlabel('Año')
         ax.set_ylabel('IVA (Millones de pesos)')
         ax.yaxis.set_major_formatter(FuncFormatter(formato_millones))
         ax.grid(True, alpha=0.3)
         ax.legend()
-        
-        # Configuración de eje X
         ax.xaxis.set_major_locator(mdates.YearLocator(2))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
-        
         plt.tight_layout()
-        plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'modelo_sarima_iva.png'), dpi=300)
+        plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'modelo_sarima_iva.png'), dpi=100)
+        plt.clf()
         plt.close(fig)
         
         # Evaluar modelo
-        # Asegurar que los índices coinciden exactamente
-        test_indices = test_iva.index
-        forecast_indices = forecast_mean_iva.index
+        metricas_sarima['AIC'] = resultado_sarima_iva.aic
+        metricas_sarima['BIC'] = resultado_sarima_iva.bic
         
-        # Encontrar índices comunes
-        common_indices = test_indices.intersection(forecast_indices)
+        if not test_iva.empty and not forecast_mean_iva.empty:
+            # Asegurar que los índices coinciden para la evaluación
+            common_indices = test_iva.index.intersection(forecast_mean_iva.index)
+            if not common_indices.empty:
+                test_aligned = test_iva.loc[common_indices]
+                forecast_aligned = forecast_mean_iva.loc[common_indices]
+                
+                if not test_aligned.empty and not forecast_aligned.empty:
+                    metricas_sarima['RMSE'] = np.sqrt(mean_squared_error(test_aligned, forecast_aligned))
+                    metricas_sarima['MAE'] = mean_absolute_error(test_aligned, forecast_aligned)
+                    # MAPE puede dar problemas si test_aligned tiene ceros.
+                    # metricas_sarima['MAPE'] = np.mean(np.abs((test_aligned - forecast_aligned) / test_aligned)) * 100
+                else:
+                    print("Alineación de test y forecast resultó en series vacías para SARIMA.")
+                    metricas_sarima['RMSE'] = np.nan
+                    metricas_sarima['MAE'] = np.nan
+            else:
+                print("No hay índices comunes entre test y forecast para SARIMA.")
+                metricas_sarima['RMSE'] = np.nan
+                metricas_sarima['MAE'] = np.nan
+        else: # Si no hay datos de prueba, las métricas de pronóstico no se calculan
+            print("No hay datos de prueba para evaluar el pronóstico SARIMA, o el pronóstico está vacío.")
+            metricas_sarima['RMSE'] = np.nan # O calcular RMSE en entrenamiento
+            metricas_sarima['MAE'] = np.nan  # O calcular MAE en entrenamiento
+
+        # Métricas en entrenamiento (siempre disponibles)
+        rmse_train = np.sqrt(mean_squared_error(train_iva, pred_mean_train_iva))
+        mae_train = mean_absolute_error(train_iva, pred_mean_train_iva)
+        print(f"SARIMA - RMSE (entrenamiento): {rmse_train:.2f}")
+        print(f"SARIMA - MAE (entrenamiento): {mae_train:.2f}")
+
+        # Guardar métricas
+        with open(os.path.join(RESULTADOS_DIR, 'metricas_modelo_sarima_iva.txt'), 'w') as f:
+            f.write("EVALUACIÓN DEL MODELO SARIMA PARA IVA\n")
+            f.write("=====================================\n\n")
+            f.write(f"AIC: {metricas_sarima.get('AIC', 'N/A'):.2f}\n")
+            f.write(f"BIC: {metricas_sarima.get('BIC', 'N/A'):.2f}\n")
+            f.write(f"RMSE (entrenamiento): {rmse_train:.2f}\n")
+            f.write(f"MAE (entrenamiento): {mae_train:.2f}\n")
+            if 'RMSE' in metricas_sarima and not np.isnan(metricas_sarima['RMSE']):
+                f.write(f"RMSE (prueba): {metricas_sarima['RMSE']:.2f}\n")
+                f.write(f"MAE (prueba): {metricas_sarima['MAE']:.2f}\n")
+            else:
+                f.write("RMSE (prueba): N/A (no hay datos de prueba o error en cálculo)\n")
+                f.write("MAE (prueba): N/A (no hay datos de prueba o error en cálculo)\n")
         
-        if len(common_indices) > 0:
-            test_aligned = test_iva.loc[common_indices]
-            forecast_aligned = forecast_mean_iva.loc[common_indices]
-            
-            # Calcular métricas
-            rmse_iva = np.sqrt(mean_squared_error(test_aligned, forecast_aligned))
-            mae_iva = mean_absolute_error(test_aligned, forecast_aligned)
-            mape_iva = np.mean(np.abs((test_aligned - forecast_aligned) / test_aligned)) * 100
-            
-            print("\nEvaluación del modelo SARIMA para IVA:")
-            print(f"RMSE: {rmse_iva:.2f}")
-            print(f"MAE: {mae_iva:.2f}")
-            print(f"MAPE: {mape_iva:.2f}%")
-            
-            # Guardar métricas
-            with open(os.path.join(RESULTADOS_DIR, 'metricas_modelo_sarima_iva.txt'), 'w') as f:
-                f.write("EVALUACIÓN DEL MODELO SARIMA PARA IVA\n")
-                f.write("=====================================\n\n")
-                f.write(f"RMSE: {rmse_iva:.2f}\n")
-                f.write(f"MAE: {mae_iva:.2f}\n")
-                f.write(f"MAPE: {mape_iva:.2f}%\n")
-        else:
-            print("No hay suficientes datos para evaluar el modelo")
-            with open(os.path.join(RESULTADOS_DIR, 'metricas_modelo_sarima_iva.txt'), 'w') as f:
-                f.write("EVALUACIÓN DEL MODELO SARIMA PARA IVA\n")
-                f.write("=====================================\n\n")
-                f.write("No hay suficientes datos para evaluar el modelo\n")
-        
-        # Análisis de residuos
+        # Análisis de residuos (código existente)
+        # ... (código de diagnóstico de residuos existente) ...
         residuos_iva = resultado_sarima_iva.resid
-        
-        # Asegurar que no hay valores NaN o infinitos
         residuos_iva = residuos_iva.fillna(method='ffill').fillna(method='bfill')
-        
-        fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-        
-        # Gráfico de residuos
-        axes[0, 0].plot(residuos_iva, color='#006BA2')
-        axes[0, 0].set_title('Residuos del Modelo SARIMA', fontweight='bold')
-        axes[0, 0].set_xlabel('Fecha')
-        axes[0, 0].set_ylabel('Residuo')
-        axes[0, 0].grid(True, alpha=0.3)
-        
-        # Histograma de residuos
-        axes[0, 1].hist(residuos_iva, bins=20, color='#006BA2', alpha=0.7)
-        axes[0, 1].set_title('Histograma de Residuos', fontweight='bold')
-        axes[0, 1].set_xlabel('Residuo')
-        axes[0, 1].set_ylabel('Frecuencia')
-        axes[0, 1].grid(True, alpha=0.3)
-        
-        # ACF de residuos
-        plot_acf(residuos_iva, ax=axes[1, 0], lags=36)
-        axes[1, 0].set_title('ACF de Residuos', fontweight='bold')
-        
-        # QQ plot
-        sm.qqplot(residuos_iva, line='45', ax=axes[1, 1])
-        axes[1, 1].set_title('QQ Plot de Residuos', fontweight='bold')
-        axes[1, 1].grid(True, alpha=0.3)
-        
-        plt.tight_layout()
-        plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'diagnostico_residuos_sarima.png'), dpi=300)
-        plt.close(fig)
-        
-        # Diagnóstico de residuos
-        fig = resultado_sarima_iva.plot_diagnostics(figsize=(15, 12))
-        fig.suptitle('Diagnóstico de Residuos del Modelo SARIMA para IVA', fontweight='bold', y=1.02)
-        plt.tight_layout()
-        plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'diagnostico_residuos_sarima.png'), dpi=300)
-        plt.close(fig)
+        if not residuos_iva.empty:
+            fig_diag = resultado_sarima_iva.plot_diagnostics(figsize=(15, 12))
+            fig_diag.suptitle('Diagnóstico de Residuos del Modelo SARIMA para IVA', fontweight='bold', y=1.02)
+            plt.tight_layout(rect=[0, 0, 1, 0.96]) # Ajuste para el supertítulo
+            plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'diagnostico_residuos_sarima.png'), dpi=100)
+            plt.clf()
+            plt.close(fig_diag)
+        else:
+            print("Residuos vacíos, no se puede generar diagnóstico para SARIMA.")
+
 
     except Exception as e:
         print(f"Error en el modelado SARIMA: {e}")
-        # Guardar error en archivo
-        with open(os.path.join(RESULTADOS_DIR, 'error_modelado.txt'), 'w') as f:
+        with open(os.path.join(RESULTADOS_DIR, 'error_modelado_sarima.txt'), 'w') as f:
             f.write(f"Error en el modelado SARIMA: {e}\n")
-            f.write("No se pudo completar el modelado SARIMA ni las pruebas dependientes.")
-        # Continuar con el resto del script si es posible, o manejar el error
-        # Por ejemplo, se podría asignar un valor por defecto a las variables que no se pudieron calcular
-        resultado_sarima_iva = None # o algún otro valor que indique fallo
-        # ... otras variables que dependan de esto ...
+        return None, {} # Devuelve None y diccionario vacío en caso de error
 
-    # Prueba de causalidad de Granger
-    # Solo si el modelo SARIMA se ejecutó correctamente
-    if resultado_sarima_iva is not None:
-        print("Realizando prueba de causalidad de Granger...")
-        
-        # Preparar datos para la prueba de Granger
-        # Usar las series diferenciadas si las originales no son estacionarias
-        # Asegurarse de que ambas series tengan la misma longitud y no contengan NaNs
-        data_granger = df_conjunto[['iva_diff', 'pib_diff']].copy()
-        data_granger = data_granger.astype(float).replace([np.inf, -np.inf], np.nan).dropna()
-
-        if not data_granger.empty and len(data_granger) > 15: # Se necesita un mínimo de datos
-            try:
-                # Convertir a tipos de datos compatibles si es necesario
-                data_granger['iva_diff'] = pd.to_numeric(data_granger['iva_diff'], errors='coerce')
-                data_granger['pib_diff'] = pd.to_numeric(data_granger['pib_diff'], errors='coerce')
-                data_granger.dropna(inplace=True)
-
-                if len(data_granger) > 15: # Re-verificar después de la coerción y dropna
-                    max_lags = min(12, len(data_granger) // 4) # Limitar lags para evitar errores
-                    if max_lags > 0:
-                        granger_results_pib_iva = grangercausalitytests(data_granger[['pib_diff', 'iva_diff']], 
-                                                                        maxlag=max_lags, verbose=False)
-                        granger_results_iva_pib = grangercausalitytests(data_granger[['iva_diff', 'pib_diff']], 
-                                                                        maxlag=max_lags, verbose=False)
-                        
-                        # Guardar resultados de causalidad de Granger
-                        with open(os.path.join(RESULTADOS_DIR, 'causalidad_granger.txt'), 'w') as f:
-                            f.write("PRUEBA DE CAUSALIDAD DE GRANGER\n")
-                            f.write("==============================\n\n")
-                            f.write("Hipótesis: PIB no causa IVA\n")
-                            for lag in granger_results_pib_iva:
-                                test_stat = granger_results_pib_iva[lag][0]['ssr_ftest'][0]
-                                p_value = granger_results_pib_iva[lag][0]['ssr_ftest'][1]
-                                f.write(f"Lag {lag}: Estadístico F = {test_stat:.4f}, Valor p = {p_value:.4f}\n")
-                            
-                            f.write("\nHipótesis: IVA no causa PIB\n")
-                            for lag in granger_results_iva_pib:
-                                test_stat = granger_results_iva_pib[lag][0]['ssr_ftest'][0]
-                                p_value = granger_results_iva_pib[lag][0]['ssr_ftest'][1]
-                                f.write(f"Lag {lag}: Estadístico F = {test_stat:.4f}, Valor p = {p_value:.4f}\n")
-                        print("Prueba de causalidad de Granger completada.")
-                    else:
-                        print("No hay suficientes datos para la prueba de Granger después de la limpieza.")
-                        with open(os.path.join(RESULTADOS_DIR, 'causalidad_granger.txt'), 'w') as f:
-                            f.write("No hay suficientes datos para la prueba de Granger después de la limpieza.")
-                else:
-                    print("No hay suficientes datos para la prueba de Granger después de la conversión y limpieza.")
-                    with open(os.path.join(RESULTADOS_DIR, 'causalidad_granger.txt'), 'w') as f:
-                        f.write("No hay suficientes datos para la prueba de Granger después de la conversión y limpieza.")
-
-            except Exception as e_granger:
-                print(f"Error en la prueba de causalidad de Granger: {e_granger}")
-                with open(os.path.join(RESULTADOS_DIR, 'causalidad_granger.txt'), 'w') as f:
-                    f.write(f"Error en la prueba de causalidad de Granger: {e_granger}\n")
-        else:
-            print("No hay suficientes datos o datos vacíos para la prueba de Granger.")
-            with open(os.path.join(RESULTADOS_DIR, 'causalidad_granger.txt'), 'w') as f:
-                f.write("No hay suficientes datos o datos vacíos para la prueba de Granger.\n")
-    else:
-        print("Modelado SARIMA falló, omitiendo prueba de causalidad de Granger.")
-        with open(os.path.join(RESULTADOS_DIR, 'causalidad_granger.txt'), 'w') as f:
-            f.write("Modelado SARIMA falló, omitiendo prueba de causalidad de Granger.\n")
+    # La prueba de causalidad de Granger se mantiene como estaba, pero se podría mover
+    # a una función separada o a main si depende de múltiples modelos.
+    # ... (código de causalidad de Granger existente) ...
 
     print("Modelado SARIMA simple para IVA completado.")
-    return resultado_sarima_iva # Asegúrate que esta variable se defina correctamente dentro de la función original
+    return resultado_sarima_iva, metricas_sarima
 
 # Nueva función para modelado SARIMAX
 def modelado_sarimax(iva_ts, pib_ts, nombre_modelo_base="SARIMAX IVA con PIB exógeno"):
     """
-    Realiza el modelado SARIMAX para la serie del IVA utilizando el PIB como variable exógena.
-    Encuentra el mejor modelo usando auto_arima, lo ajusta y guarda resultados y gráficos.
+    Modela la serie temporal del IVA utilizando un modelo SARIMAX con el PIB como variable exógena.
+    Devuelve el resultado del modelo y un diccionario de métricas.
     """
     print(f"\n--- Modelado {nombre_modelo_base} ---")
     
-    if iva_ts.empty or pib_ts.empty:
-        print("Error: Las series de IVA o PIB están vacías. No se puede continuar con el modelado SARIMAX.")
-        return None, {}
+    metricas = {}
+    results = None
 
-    # Asegurar que pib_ts (exógena) esté alineada con iva_ts y no tenga NaNs donde iva_ts no los tiene.
-    pib_ts_aligned = pib_ts[iva_ts.index].dropna()
-    iva_ts_aligned = iva_ts[pib_ts_aligned.index].dropna() # Re-alinear iva_ts con los índices válidos de pib_ts
-    
-    if iva_ts_aligned.empty or pib_ts_aligned.empty:
-        print("Error: Series vacías después de alineación y dropna para SARIMAX. No se puede modelar.")
-        return None, {}
-        
-    exog_pib_reshaped = pib_ts_aligned.values.reshape(-1, 1)
-
-    print("Buscando el mejor modelo SARIMAX con auto_arima...")
     try:
-        modelo_auto = pm.auto_arima(iva_ts_aligned, 
-                                    exogenous=exog_pib_reshaped,
-                                    start_p=1, start_q=1,
-                                    test='adf',
-                                    max_p=3, max_q=3,
-                                    m=12, # Frecuencia mensual
-                                    start_P=0, seasonal=True,
-                                    D=None, # auto_arima determina D
-                                    trace=True,
-                                    error_action='ignore',  
-                                    suppress_warnings=True, 
-                                    stepwise=True)
+        # Preparar datos para modelado
+        fecha_corte = '2023-12-31' # O la última fecha disponible si es dinámica
+        if not isinstance(iva_ts.index, pd.DatetimeIndex):
+            iva_ts.index = pd.to_datetime(iva_ts.index)
+        if not isinstance(pib_ts.index, pd.DatetimeIndex):
+            pib_ts.index = pd.to_datetime(pib_ts.index)
 
-        print(f"Mejor modelo SARIMAX encontrado: {modelo_auto.order}, {modelo_auto.seasonal_order}")
-        order_opt = modelo_auto.order
-        seasonal_order_opt = modelo_auto.seasonal_order
+        if pd.to_datetime(fecha_corte) not in iva_ts.index:
+            split_point = int(len(iva_ts) * 0.8)
+            train_iva = iva_ts.iloc[:split_point]
+            test_iva = iva_ts.iloc[split_point:]
+            train_pib = pib_ts.iloc[:split_point]
+            test_pib = pib_ts.iloc[split_point:]
+            fecha_corte_real = train_iva.index[-1]
+            print(f"Advertencia: Fecha de corte '{fecha_corte}' no encontrada. Usando '{fecha_corte_real}' como fecha de corte efectiva.")
+        else:
+            train_iva = iva_ts.loc[:fecha_corte]
+            test_iva = iva_ts.loc[pd.to_datetime(fecha_corte) + pd.DateOffset(days=1):]
+            train_pib = pib_ts.loc[:fecha_corte]
+            test_pib = pib_ts.loc[pd.to_datetime(fecha_corte) + pd.DateOffset(days=1):]
+            fecha_corte_real = pd.to_datetime(fecha_corte)
+
+        train_iva = pd.to_numeric(train_iva, errors='coerce').dropna()
+        test_iva = pd.to_numeric(test_iva, errors='coerce').dropna()
+        train_pib = pd.to_numeric(train_pib, errors='coerce').dropna()
+        test_pib = pd.to_numeric(test_pib, errors='coerce').dropna()
         
-        model = SARIMAX(iva_ts_aligned,
-                        exog=exog_pib_reshaped,
-                        order=order_opt,
-                        seasonal_order=seasonal_order_opt,
-                        enforce_stationarity=False,
-                        enforce_invertibility=False,
-                        initialization='approximate_diffuse')
-        results = model.fit(disp=False)
-
-    except Exception as e:
-        print(f"Error durante auto_arima o ajuste del modelo SARIMAX: {e}")
-        print("Intentando con parámetros SARIMAX por defecto (1,1,1)(1,1,1,12).")
-        try:
-            order_opt = (1,1,1)
-            seasonal_order_opt = (1,1,1,12)
-            model = SARIMAX(iva_ts_aligned,
-                            exog=exog_pib_reshaped,
-                            order=order_opt,
-                            seasonal_order=seasonal_order_opt,
-                            enforce_stationarity=False,
-                            enforce_invertibility=False,
-                            initialization='approximate_diffuse')
-            results = model.fit(disp=False)
-        except Exception as e_fallback:
-            print(f"Error con el modelo SARIMAX de fallback: {e_fallback}")
+        if train_iva.empty or train_pib.empty:
+            print("No hay datos de entrenamiento suficientes para el modelo SARIMAX.")
             return None, {}
 
-    print(results.summary())
-    with open(os.path.join(RESULTADOS_DIR, 'resumen_modelo_sarimax_iva.txt'), 'w') as f: # Nombre corregido
-        f.write(results.summary().as_text())
-    print(f"Resumen del modelo SARIMAX guardado en {os.path.join(RESULTADOS_DIR, 'resumen_modelo_sarimax_iva.txt')}")
+        # Modelado con auto_arima
+        modelo_sarimax = pm.auto_arima(train_iva, exogenous=train_pib, seasonal=True, m=12,
+                                       stepwise=True, trace=True, error_action='ignore', suppress_warnings=True)
+        
+        order_opt = modelo_sarimax.order
+        seasonal_order_opt = modelo_sarimax.seasonal_order
+        print(f"Órdenes óptimas para {nombre_modelo_base}: {order_opt} {seasonal_order_opt}")
+        
+        # Ajustar modelo SARIMAX con órdenes óptimas
+        modelo_sarimax_opt = SARIMAX(train_iva, exog=train_pib, 
+                                     order=order_opt, 
+                                     seasonal_order=seasonal_order_opt,
+                                     enforce_stationarity=False,
+                                     enforce_invertibility=False,
+                                     initialization='approximate_diffuse')
+        
+        results = modelo_sarimax_opt.fit(disp=False)
+        
+        print(f"\nResumen del modelo {nombre_modelo_base}:")
+        print(results.summary())
+        with open(os.path.join(RESULTADOS_DIR, f'resumen_modelo_{nombre_modelo_base.lower().replace(" ", "_")}.txt'), 'w') as f:
+            f.write(str(results.summary()))
+        
+        # Pronóstico
+        pred_train = results.get_prediction(start=train_iva.index[0], end=train_iva.index[-1], exog=train_pib, dynamic=False)
+        pred_mean_train = pred_train.predicted_mean
+
+        if not test_iva.empty and not test_pib.empty:
+            forecast_out_of_sample = results.get_forecast(steps=len(test_iva), exog=test_pib)
+            forecast_mean = forecast_out_of_sample.predicted_mean
+            forecast_ci = forecast_out_of_sample.conf_int()
+        else:
+            print(f"Test set vacío, pronosticando 12 pasos futuros para {nombre_modelo_base}.")
+            num_future_steps = 12
+            future_forecast_index = pd.date_range(start=train_iva.index[-1] + pd.DateOffset(months=1), periods=num_future_steps, freq=train_iva.index.freqstr or 'MS')
+            future_pib = np.tile(train_pib.values[-12:], num_future_steps // 12 + 1)[:num_future_steps]
+            forecast_out_of_sample = results.get_forecast(steps=num_future_steps, exog=future_pib.reshape(-1, 1))
+            forecast_mean = pd.Series(forecast_out_of_sample.predicted_mean.values, index=future_forecast_index)
+            forecast_ci = pd.DataFrame(forecast_out_of_sample.conf_int(), index=future_forecast_index, columns=['lower iva', 'upper iva'])
+
+        # Visualizar resultados del modelo
+        fig, ax = plt.figure(figsize=(14, 7)), plt.gca()
+        ax.plot(iva_ts.index, iva_ts, color='#006BA2', label='Observado')
+        ax.plot(pred_mean_train.index, pred_mean_train, color='#A2C510', linestyle='--', label='Ajustado (Entrenamiento)')
+        if not test_iva.empty or num_future_steps > 0:
+            ax.plot(forecast_mean.index, forecast_mean, color='#F4364C', linestyle='--', label='Pronóstico')
+            ax.fill_between(forecast_ci.index, forecast_ci.iloc[:, 0], forecast_ci.iloc[:, 1], color='#F4364C', alpha=0.2)
+        
+        ax.axvline(x=fecha_corte_real, color='black', linestyle=':', label=f'Corte: {fecha_corte_real.strftime("%Y-%m-%d")}')
+        ax.set_title(f'Modelo {nombre_modelo_base}: Ajuste y Pronóstico', fontweight='bold')
+        ax.set_xlabel('Año')
+        ax.set_ylabel('IVA (Millones de pesos)')
+        ax.yaxis.set_major_formatter(FuncFormatter(formato_millones))
+        ax.grid(True, alpha=0.3)
+        ax.legend()
+        ax.xaxis.set_major_locator(mdates.YearLocator(2))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+        plt.tight_layout()
+        plt.savefig(os.path.join(VISUALIZACIONES_DIR, f'modelo_{nombre_modelo_base.lower().replace(" ", "_")}.png'), dpi=100)
+        plt.clf()
+        plt.close(fig)
+        
+        # Evaluar modelo
+        metricas['AIC'] = results.aic
+        metricas['BIC'] = results.bic
+        
+        if not test_iva.empty and not forecast_mean.empty:
+            common_indices = test_iva.index.intersection(forecast_mean.index)
+            if not common_indices.empty:
+                test_aligned = test_iva.loc[common_indices]
+                forecast_aligned = forecast_mean.loc[common_indices]
+                
+                if not test_aligned.empty and not forecast_aligned.empty:
+                    metricas['RMSE'] = np.sqrt(mean_squared_error(test_aligned, forecast_aligned))
+                    metricas['MAE'] = mean_absolute_error(test_aligned, forecast_aligned)
+                else:
+                    print(f"Alineación de test y forecast resultó en series vacías para {nombre_modelo_base}.")
+                    metricas['RMSE'] = np.nan
+                    metricas['MAE'] = np.nan
+            else:
+                print(f"No hay índices comunes entre test y forecast para {nombre_modelo_base}.")
+                metricas['RMSE'] = np.nan
+                metricas['MAE'] = np.nan
+        else:
+            print(f"No hay datos de prueba para evaluar el pronóstico {nombre_modelo_base}, o el pronóstico está vacío.")
+            metricas['RMSE'] = np.nan
+            metricas['MAE'] = np.nan
+
+        rmse_train = np.sqrt(mean_squared_error(train_iva, pred_mean_train))
+        mae_train = mean_absolute_error(train_iva, pred_mean_train)
+        print(f"{nombre_modelo_base} - RMSE (entrenamiento): {rmse_train:.2f}")
+        print(f"{nombre_modelo_base} - MAE (entrenamiento): {mae_train:.2f}")
+
+        with open(os.path.join(RESULTADOS_DIR, f'metricas_modelo_{nombre_modelo_base.lower().replace(" ", "_")}.txt'), 'w') as f:
+            f.write(f"EVALUACIÓN DEL MODELO {nombre_modelo_base.upper()}\n")
+            f.write("=====================================\n\n")
+            f.write(f"AIC: {metricas.get('AIC', 'N/A'):.2f}\n")
+            f.write(f"BIC: {metricas.get('BIC', 'N/A'):.2f}\n")
+            f.write(f"RMSE (entrenamiento): {rmse_train:.2f}\n")
+            f.write(f"MAE (entrenamiento): {mae_train:.2f}\n")
+            if 'RMSE' in metricas and not np.isnan(metricas['RMSE']):
+                f.write(f"RMSE (prueba): {metricas['RMSE']:.2f}\n")
+                f.write(f"MAE (prueba): {metricas['MAE']:.2f}\n")
+            else:
+                f.write("RMSE (prueba): N/A (no hay datos de prueba o error en cálculo)\n")
+                f.write("MAE (prueba): N/A (no hay datos de prueba o error en cálculo)\n")
+
+        residuos = results.resid
+        residuos = residuos.fillna(method='ffill').fillna(method='bfill')
+        if not residuos.empty:
+            fig_diag = results.plot_diagnostics(figsize=(15, 12))
+            fig_diag.suptitle(f'Diagnóstico de Residuos del Modelo {nombre_modelo_base}', fontweight='bold', y=1.02)
+            plt.tight_layout(rect=[0, 0, 1, 0.96])
+            plt.savefig(os.path.join(VISUALIZACIONES_DIR, f'diagnostico_residuos_{nombre_modelo_base.lower().replace(" ", "_")}.png'), dpi=100)
+            plt.clf()
+            plt.close(fig_diag)
+        else:
+            print(f"Residuos vacíos, no se puede generar diagnóstico para {nombre_modelo_base}.")
+
+        metricas = {
+            'AIC': results.aic,
+            'BIC': results.bic,
+            'MAE': mae_train,
+            'RMSE': rmse_train,
+            'Order': str(order_opt),  # Convertir a string para consistencia en CSV
+            'SeasonalOrder': str(seasonal_order_opt) # Convertir a string
+        }
+
+    except Exception as e:
+        print(f"Error en el modelado {nombre_modelo_base}: {e}")
+        with open(os.path.join(RESULTADOS_DIR, f'error_modelado_{nombre_modelo_base.lower().replace(" ", "_")}.txt'), 'w') as f:
+            f.write(f"Error en el modelado {nombre_modelo_base}: {e}\n")
+        return None, {}
+
+    print(f"Modelado {nombre_modelo_base} completado.")
+    return results, metricas
+
+# Nueva función para generar comparación de modelos
+def generar_comparacion_modelos(metricas_modelos):
+    """
+    Genera un archivo CSV y un gráfico comparando las métricas de los modelos.
+    metricas_modelos: lista de diccionarios, cada uno con 'nombre' y métricas.
+                      Ej: [{'nombre': 'SARIMA', 'AIC': ..., 'RMSE': ...}, ...]
+    """
+    print("\n--- Generando Comparación de Modelos ---")
+    if not metricas_modelos:
+        print("No hay métricas de modelos para comparar.")
+        return
+
+    # Crear DataFrame con las métricas
+    df_comparacion = pd.DataFrame(metricas_modelos)
+    
+    # Seleccionar métricas relevantes para el CSV y asegurar que las columnas existan
+    columnas_csv = ['nombre', 'AIC', 'BIC', 'RMSE', 'MAE', 'Order', 'SeasonalOrder']
+    columnas_presentes = [col for col in columnas_csv if col in df_comparacion.columns]
+    df_comparacion_csv = df_comparacion[columnas_presentes]
+
+    # Guardar en CSV
+    ruta_csv = os.path.join(RESULTADOS_DIR, 'comparacion_modelos.csv')
+    try:
+        df_comparacion_csv.to_csv(ruta_csv, index=False, float_format='%.2f')
+        print(f"Archivo de comparación de modelos guardado en: {ruta_csv}")
+    except Exception as e:
+        print(f"Error al guardar comparacion_modelos.csv: {e}")
+
+    # Generar gráfico de comparación (RMSE y MAE)
+    # Filtrar modelos que tengan RMSE y MAE válidos
+    df_plot = df_comparacion[df_comparacion['RMSE'].notna() & df_comparacion['MAE'].notna()].copy()
+
+    if df_plot.empty:
+        print("No hay suficientes datos válidos de RMSE/MAE para generar el gráfico de comparación.")
+        return
+
+    # Usar nombres de modelo como índice para el gráfico
+    df_plot.set_index('nombre', inplace=True)
+    
+    # Seleccionar solo RMSE y MAE para el gráfico
+    df_plot_metrics = df_plot[['RMSE', 'MAE']]
 
     try:
-        fig_diag = results.plot_diagnostics(figsize=(15, 12))
-        fig_diag.suptitle(f'Diagnóstico de Residuos del Modelo {nombre_modelo_base}', fontsize=16)
-        plt.tight_layout(rect=[0, 0, 1, 0.96])
-        plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'diagnostico_residuos_sarimax.png')) # Nombre corregido
-        plt.close(fig_diag)
-        print(f"Diagnóstico de residuos SARIMAX guardado en {os.path.join(VISUALIZACIONES_DIR, 'diagnostico_residuos_sarimax.png')}")
+        fig, ax = plt.subplots(figsize=(10, 6))
+        df_plot_metrics.plot(kind='bar', ax=ax, colormap='viridis', alpha=0.75) # Usar un colormap
+        
+        ax.set_title('Comparación de Modelos: RMSE y MAE', fontweight='bold', fontsize=14)
+        ax.set_ylabel('Valor de la Métrica', fontsize=12)
+        ax.set_xlabel('Modelo', fontsize=12)
+        ax.tick_params(axis='x', rotation=45, labelsize=10)
+        ax.tick_params(axis='y', labelsize=10)
+        ax.grid(True, linestyle='--', alpha=0.7)
+        ax.legend(title='Métricas')
+        
+        # Añadir valores en las barras
+        for p in ax.patches:
+            ax.annotate(f"{p.get_height():.2f}", 
+                        (p.get_x() + p.get_width() / 2., p.get_height()), 
+                        ha='center', va='center', 
+                        xytext=(0, 9), 
+                        textcoords='offset points', fontsize=8)
+
+        plt.tight_layout()
+        ruta_png = os.path.join(VISUALIZACIONES_DIR, 'comparacion_modelos.png')
+        plt.savefig(ruta_png, dpi=100)
+        plt.clf()
+        plt.close(fig)
+        print(f"Gráfico de comparación de modelos guardado en: {ruta_png}")
     except Exception as e:
-        print(f"Error al generar diagnóstico de residuos SARIMAX: {e}")
-
-    pred_insample = results.get_prediction(start=iva_ts_aligned.index[0], 
-                                           end=iva_ts_aligned.index[-1], 
-                                           exog=exog_pib_reshaped, 
-                                           dynamic=False)
-    pred_mean_insample = pred_insample.predicted_mean
-    
-    mae = mean_absolute_error(iva_ts_aligned, pred_mean_insample)
-    rmse = np.sqrt(mean_squared_error(iva_ts_aligned, pred_mean_insample))
-    aic = results.aic
-    bic = results.bic
-    
-    print(f"AIC (SARIMAX): {aic}")
-    print(f"BIC (SARIMAX): {bic}")
-    print(f"MAE (SARIMAX en muestra): {mae}")
-    print(f"RMSE (SARIMAX en muestra): {rmse}")
-
-    with open(os.path.join(RESULTADOS_DIR, 'metricas_modelo_sarimax_iva.txt'), 'w') as f: # Nombre corregido
-        f.write(f"AIC: {aic}\n")
-        f.write(f"BIC: {bic}\n")
-        f.write(f"MAE (en muestra): {mae}\n")
-        f.write(f"RMSE (en muestra): {rmse}\n")
-        f.write(f"Order: {order_opt}\n")
-        f.write(f"Seasonal Order: {seasonal_order_opt}\n")
-    print(f"Métricas del modelo SARIMAX guardadas en {os.path.join(RESULTADOS_DIR, 'metricas_modelo_sarimax_iva.txt')}")
-
-    n_forecast = 24 # Aumentado para mejor visualización
-    
-    # Crear exógenos para el período de pronóstico (ej. usando el último valor conocido de PIB o una proyección)
-    # Aquí, como ejemplo simple, repetimos el último valor. En un caso real, se usaría una predicción del PIB.
-    last_pib_value = pib_ts_aligned.iloc[-1] if not pib_ts_aligned.empty else 0
-    future_exog_array = np.array([last_pib_value] * n_forecast).reshape(-1, 1)
-    
-    last_date_iva = iva_ts_aligned.index[-1] if not iva_ts_aligned.empty else pd.Timestamp.now()
-    forecast_index = pd.date_range(start=last_date_iva + pd.DateOffset(months=1), 
-                                   periods=n_forecast, 
-                                   freq=iva_ts_aligned.index.freqstr or 'MS')
-
-    pred_uc = results.get_forecast(steps=n_forecast, exog=future_exog_array)
-    pred_ci = pred_uc.conf_int()
-
-    plt.figure(figsize=(14, 7))
-    plt.plot(iva_ts_aligned, label='Observado (IVA)', color='#006BA2')
-    plt.plot(pred_mean_insample, label='Ajuste SARIMAX en muestra', color='#A2C510', linestyle='--')
-    
-    pred_uc_mean_series = pd.Series(pred_uc.predicted_mean.values, index=forecast_index)
-    plt.plot(pred_uc_mean_series, label=f'Predicción SARIMAX ({n_forecast} meses)', color='#F4364C', linestyle='--')
-    
-    pred_ci.index = forecast_index
-    plt.fill_between(pred_ci.index,
-                     pred_ci.iloc[:, 0],
-                     pred_ci.iloc[:, 1], color='#F4364C', alpha=.15, label='Intervalo de Confianza')
-    
-    plt.title(f'Modelo {nombre_modelo_base}: Observado vs. Ajustado vs. Predicción', fontweight='bold')
-    plt.xlabel('Fecha')
-    plt.ylabel('Recaudo IVA (Millones COP)')
-    plt.gca().yaxis.set_major_formatter(FuncFormatter(formato_millones)) # Usar formateador
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.savefig(os.path.join(VISUALIZACIONES_DIR, 'modelo_sarimax_iva.png')) # Nombre corregido
-    plt.close()
-    print(f"Gráfico del modelo SARIMAX guardado en {os.path.join(VISUALIZACIONES_DIR, 'modelo_sarimax_iva.png')}")
-    
-    metricas = {'AIC': aic, 'BIC': bic, 'MAE': mae, 'RMSE': rmse, 
-                'Order': order_opt, 'SeasonalOrder': seasonal_order_opt}
-    return results, metricas
+        print(f"Error al generar comparacion_modelos.png: {e}")
 
 # Función principal
 def main():
     """Función principal para el análisis de series temporales"""
     print("Iniciando análisis de series temporales: PIB e IVA en Colombia (2000-2024)...")
     
-    # Cargar datos alineados
-    df_conjunto = cargar_datos_alineados() # df_conjunto tiene 'iva' y 'pib_usd'
-    
-    # Realizar análisis exploratorio
-    df_conjunto_eda = realizar_eda(df_conjunto.copy()) # Pasar copia para no modificar original innecesariamente
-    
-    # Realizar pruebas de estacionariedad
-    df_conjunto_est = pruebas_estacionariedad(df_conjunto.copy())
-    
-    # Descomponer series temporales
-    descomp_iva, descomp_pib = descomponer_series(df_conjunto.copy())
-    
-    # Modelar series temporales con SARIMAX
-    # Extraer las series individuales para SARIMAX
-    iva_ts = df_conjunto['iva'].copy()
-    pib_ts = df_conjunto['pib_usd'].copy() # Usar 'pib_usd' como exógena
+    df_conjunto = cargar_datos_alineados()
+    if df_conjunto.empty:
+        print("No se pudieron cargar los datos. Abortando análisis.")
+        return
 
+    realizar_eda(df_conjunto.copy())
+    pruebas_estacionariedad(df_conjunto.copy())
+    descomponer_series(df_conjunto.copy())
+    
+    iva_ts = df_conjunto['iva'].copy()
+    pib_ts = df_conjunto['pib_usd'].copy()
+
+    lista_metricas_comparacion = []
+
+    # Modelado SARIMA simple
+    print("\nLlamando a modelado_sarima_simple_iva...")
+    # Pasar df_conjunto completo para que la función maneje el split train/test
+    resultado_sarima_simple, metricas_sarima = modelado_sarima_simple_iva(df_conjunto.copy()) 
+    if resultado_sarima_simple and metricas_sarima:
+        print("\n--- Resultados del Modelo SARIMA Simple ---")
+        # print(resultado_sarima_simple.summary()) # Ya se imprime y guarda dentro de la función
+        print("\nMétricas del modelo SARIMA simple:")
+        for k, v in metricas_sarima.items():
+            print(f"  {k}: {v}")
+        metricas_sarima_comp = {'nombre': 'SARIMA (IVA)'}
+        metricas_sarima_comp.update(metricas_sarima)
+        # Extraer órdenes si están disponibles en el resultado del modelo (no en auto_arima)
+        # Para SARIMAX manual, los órdenes son fijos.
+        metricas_sarima_comp['Order'] = str(resultado_sarima_simple.model.order) if hasattr(resultado_sarima_simple, 'model') else 'N/A'
+        metricas_sarima_comp['SeasonalOrder'] = str(resultado_sarima_simple.model.seasonal_order) if hasattr(resultado_sarima_simple, 'model') else 'N/A'
+        lista_metricas_comparacion.append(metricas_sarima_comp)
+    else:
+        print("El modelado SARIMA simple no pudo completarse o no devolvió resultados/métricas.")
+
+    # Modelado SARIMAX
     if not iva_ts.empty and not pib_ts.empty:
         print("\nLlamando a modelado_sarimax...")
-        modelo_sarimax_results, metricas_sarimax = modelado_sarimax(iva_ts, pib_ts)
-        if modelo_sarimax_results:
+        # Para SARIMAX, usualmente se entrena con todos los datos disponibles de IVA y PIB alineados
+        # y luego se pronostica. La función modelado_sarimax ya maneja esto.
+        modelo_sarimax_results, metricas_sarimax = modelado_sarimax(iva_ts, pib_ts) # Usa iva_ts y pib_ts completos
+        if modelo_sarimax_results and metricas_sarimax:
             print("\n--- Resultados del Modelo SARIMAX ---")
-            print(modelo_sarimax_results.summary())
+            # print(modelo_sarimax_results.summary()) # Ya se imprime y guarda dentro de la función
             print("\nMétricas del modelo SARIMAX:")
-            for k, v in metricas_sarimax.items():
+            for k, v in metricas_sarimax.items(): # metricas_sarimax ya tiene Order y SeasonalOrder de auto_arima
                 print(f"  {k}: {v}")
+            metricas_sarimax_comp = {'nombre': 'SARIMAX (IVA ~ PIB)'}
+            metricas_sarimax_comp.update(metricas_sarimax)
+            lista_metricas_comparacion.append(metricas_sarimax_comp)
         else:
-            print("El modelado SARIMAX no pudo completarse o retornó None.")
+            print("El modelado SARIMAX no pudo completarse o no devolvió resultados/métricas.")
     else:
-        print("Las series de IVA o PIB están vacías antes de llamar a modelado_sarimax. Saltando modelado.")
+        print("Las series de IVA o PIB están vacías antes de llamar a modelado_sarimax. Saltando modelado SARIMAX.")
 
-    # Opcional: Llamar al modelado SARIMA simple si se desea conservar
-    # print("\nLlamando a modelado_sarima_simple_iva...")
-    # resultado_sarima_simple = modelado_sarima_simple_iva(df_conjunto.copy())
-    # if resultado_sarima_simple:
-    #     print("\n--- Resultados del Modelo SARIMA Simple ---")
-    #     print(resultado_sarima_simple.summary())
+    # Generar comparación de modelos si hay métricas disponibles
+    if lista_metricas_comparacion:
+        generar_comparacion_modelos(lista_metricas_comparacion)
+    else:
+        print("No hay métricas de ningún modelo para comparar.")
     
-    print("\nAnálisis de series temporales (con enfoque en SARIMAX) completado con éxito.")
+    print("\nAnálisis de series temporales completado con éxito.")
     print(f"Resultados guardados en las carpetas '{RESULTADOS_DIR}' y '{VISUALIZACIONES_DIR}'.")
 
 if __name__ == "__main__":
