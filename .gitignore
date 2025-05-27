@@ -3,21 +3,35 @@ venv/
 .venv/
 ENV/
 env/
+env.bak/
+venv.bak/
 
 # Archivos de Python compilados
 *.pyc
 *.pyo
 *.pyd
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 
 # Archivos de configuración del editor/IDE
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
+*.swp
+*.swo
+*~
 
 # Archivos de sistema operativo
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
 # Archivos de Jupyter Notebook
@@ -28,6 +42,9 @@ Thumbs.db
 # *.csv
 # *.xlsx
 # (Descomenta y ajusta según sea necesario si tienes archivos de datos grandes o sensibles)
+*.csv
+*.xlsx
+data/
 
 # Archivos de logs
 *.log
@@ -42,7 +59,19 @@ Thumbs.db
 # Carpetas de build/distribución
 build/
 dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
 *.egg-info/
+.installed.cfg
+*.egg
 
 # Archivos específicos de Streamlit (si es necesario)
-.streamlit/
+.streamlit/secrets.toml
+.streamlit/config.toml

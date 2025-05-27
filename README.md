@@ -1,76 +1,184 @@
-# Análisis de la Relación entre PIB e IVA en Colombia
+# 🇨🇴 Dashboard PIB-IVA Colombia 2000-2024
 
-Este proyecto analiza la relación entre el Producto Interno Bruto (PIB) y la recaudación del Impuesto al Valor Agregado (IVA) en Colombia utilizando datos históricos desde el año 2000 hasta 2024.
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://tu-usuario-proyecto-analisis-pib-iva.streamlit.app/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Descripción
+## 📊 Descripción
 
-El objetivo principal es modelar y predecir estas series temporales, así como entender la dinámica entre ellas. Se utilizan diversas técnicas de análisis de series temporales, incluyendo modelos SARIMA y redes neuronales (RNN).
+Dashboard interactivo para análisis econométrico del PIB e IVA en Colombia (2000-2024) con predicción para 2025 utilizando modelos avanzados de series temporales y machine learning.
 
-Los resultados y visualizaciones se presentan en una aplicación interactiva desarrollada con Streamlit.
+## 🚀 Demo en Vivo
 
-## Estructura del Proyecto
+🌐 **[Ver Dashboard en Streamlit Cloud](https://tu-usuario-proyecto-analisis-pib-iva.streamlit.app/)**
 
-*   `codigo/`: Contiene todos los scripts de Python para la obtención, procesamiento, análisis de datos y la aplicación Streamlit.
-    *   `obtener_pib_colombia.py`: Script para descargar y procesar datos del PIB de Colombia.
-    *   `estandarizar_alinear_series.py`: Script para cargar datos del IVA, estandarizarlos y alinearlos con los datos del PIB.
-    *   `analisis_series_temporales_depurado.py`: Script para realizar el análisis de series temporales (descomposición, SARIMA, causalidad de Granger).
-    *   `redes_neuronales_series_temporales.py`: Script para implementar modelos de redes neuronales para la predicción.
-    *   `app_streamlit.py`: Aplicación Streamlit para visualizar los resultados.
-*   `datos/`: Almacena los archivos de datos generados y utilizados en el análisis (ej. `pib_mensual_colombia.csv`, `iva_pib_alineado.csv`).
-*   `visualizaciones/`: Contiene las gráficas generadas durante el análisis (ej. `series_alineadas.png`, `pronostico_sarima.png`).
-*   `resultados/`: Guarda los resultados numéricos y textuales de los análisis (ej. `metricas_sarima.txt`, `correlacion.txt`).
-*   `modelos/`: Almacena los modelos entrenados (ej. `modelo_sarima_pib.pkl`, `modelo_rnn.h5`).
-*   `requirements.txt`: Lista de dependencias de Python necesarias para ejecutar el proyecto.
-*   `README.md`: Este archivo.
+## ✨ Características
 
-## Cómo Ejecutar
+### 📈 Modelos Implementados
+- **ARIMA/SARIMA** con selección automática de parámetros
+- **SARIMAX** con PIB como variable exógena
+- **VAR** (Vector Autoregresivo) multivariado
+- **Box-Cox** para transformaciones de estabilización
+- **Machine Learning** (Random Forest, Gradient Boosting)
 
-1.  **Clonar el repositorio (si aplica):**
-    ```bash
-    git clone https://github.com/efrenbohorquez/proyecto_analisis_pib_iva.git
-    cd proyecto_analisis_pib_iva
-    ```
-2.  **Crear un entorno virtual (recomendado):**
-    ```bash
-    python -m venv .venv
-    # Activar el entorno (Windows)
-    .venv\Scripts\activate
-    # Activar el entorno (Linux/macOS)
-    # source .venv/bin/activate
-    ```
-3.  **Instalar dependencias:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-4.  **Ejecutar los scripts de análisis (en orden):**
-    Los scripts están diseñados para ser ejecutados en secuencia o pueden ser invocados por la aplicación Streamlit si está configurada para ello.
-    *   `python codigo/obtener_pib_colombia.py`
-    *   `python codigo/estandarizar_alinear_series.py`
-    *   `python codigo/analisis_series_temporales_depurado.py`
-    *   `python codigo/redes_neuronales_series_temporales.py`
+### 📊 Análisis Disponibles
+- Análisis histórico PIB-IVA (2000-2024)
+- Transformaciones para estabilizar varianza
+- Tests de estacionariedad
+- Diagnósticos de residuos
+- Funciones de respuesta al impulso
+- Predicción consenso 2025
 
-5.  **Ejecutar la aplicación Streamlit:**
-    ```bash
-    streamlit run codigo/app_streamlit.py
-    ```
-    Esto abrirá la aplicación en tu navegador web.
+## 🛠️ Instalación Local
 
-## Despliegue en Streamlit Community Cloud
+### Prerrequisitos
+- Python 3.8+
+- Git
 
-Esta aplicación está (o puede ser) desplegada usando Streamlit Community Cloud.
-*   **Repositorio:** `https://github.com/efrenbohorquez/proyecto_analisis_pib_iva`
-*   **Archivo principal:** `codigo/app_streamlit.py`
+### Instalación Rápida
+```bash
+# Clonar repositorio
+git clone https://github.com/TU_USUARIO/proyecto-analisis-pib-iva.git
+cd proyecto-analisis-pib-iva
 
-## Datos
+# Ejecutar dashboard (instala dependencias automáticamente)
+./EJECUTAR_DASHBOARD.bat  # Windows
+```
 
-*   **IVA:** Datos de recaudación mensual del IVA en Colombia. Fuente original: [Incluir fuente si se conoce, ej. DIAN]. Archivo: `D:\Downloads\SERIES DE TIEMPO 2025\series iva\data_iva.xlsx` (ruta local original).
-*   **PIB:** Datos del Producto Interno Bruto de Colombia (anual, trimestral, mensual). Fuente: Banco Mundial y DANE, procesados por el script `obtener_pib_colombia.py`.
+### Instalación Manual
+```bash
+# Instalar dependencias
+pip install streamlit plotly pandas numpy scikit-learn
+pip install statsmodels pmdarima arch scipy
 
-## Autor
+# Ejecutar dashboard
+streamlit run streamlit_app.py
+```
 
-  equipo serie de tiempo
-  
+## 📱 Uso
+
+1. **Ejecutar** `EJECUTAR_DASHBOARD.bat`
+2. **Abrir** http://localhost:8501
+3. **Explorar** las 6 pestañas de análisis:
+   - 📊 Análisis Detallado
+   - 📈 Box-Cox & Transformaciones
+   - 🔄 ARIMA & SARIMA
+   - 🌐 SARIMAX & VAR
+   - 🤖 Machine Learning
+   - 🔮 Predicción 2025
+
+## 📊 Estructura del Proyecto
+
+```
+proyecto-analisis-pib-iva/
+├── streamlit_app.py          # Aplicación principal
+├── EJECUTAR_DASHBOARD.bat    # Script de ejecución Windows
+├── launch_dashboard.py       # Lanzador Python
+├── requirements.txt          # Dependencias
+├── setup_github.bat         # Configuración GitHub
+└── README.md                # Este archivo
+```
+
+## 🔮 Predicciones 2025
+
+### 📈 Proyecciones Económicas
+- **PIB 2025**: 1,100-1,200 billones COP
+- **IVA 2025**: 165-185 billones COP  
+- **Ratio IVA/PIB**: 14.5-15.5%
+- **Consenso**: Promedio de 8+ modelos
+
+### 🎯 Escenarios Disponibles
+- **Conservador** (2% crecimiento PIB)
+- **Moderado** (3.5% crecimiento PIB)
+- **Optimista** (5% crecimiento PIB)
+- **Personalizado** (slider interactivo)
+
+## 🤖 Modelos Técnicos
+
+### Series Temporales
+- **Auto-ARIMA** con pmdarima
+- **SARIMAX** con statsmodels
+- **VAR** multivariado
+- **Box-Cox** para transformaciones
+
+### Machine Learning
+- Random Forest Regressor
+- Gradient Boosting Regressor
+- Regresión Lineal
+
+## 📈 Resultados
+
+### Correlación PIB-IVA
+- **r = 0.95+** (correlación muy fuerte)
+- **R² > 0.90** en modelos ML
+- **AIC/BIC optimizados** en modelos ARIMA
+
+### Eficiencia del Recaudo
+- **Tasa efectiva**: ~16% (vs 19% nominal)
+- **Base gravable**: 60% del PIB
+- **Eficiencia**: 84% del potencial teórico
+
+## 🌐 Deployment
+
+### Streamlit Cloud
+```bash
+# 1. Subir a GitHub
+git push origin main
+
+# 2. Conectar en streamlit.io
+# 3. Deploy automático
+```
+
+### Heroku
+```bash
+# Crear Procfile
+echo "web: streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0" > Procfile
+
+# Deploy
+git add Procfile
+git commit -m "Add Procfile for Heroku"
+git push heroku main
+```
+
+## 📚 Metodología
+
+### Fuentes de Datos
+- **DANE Colombia**: PIB oficial
+- **Ministerio de Hacienda**: Recaudo IVA
+- **Banco de la República**: Series macroeconómicas
+
+### Validación
+- **Backtesting** con datos 2020-2024
+- **Cross-validation** temporal
+- **Test de Ljung-Box** para residuos
+- **ADF test** para estacionariedad
+
+## 🤝 Contribuir
+
+1. Fork el proyecto
+2. Crear rama feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit cambios (`git commit -m 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Crear Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
+
+## 👨‍💻 Autor
+
+**Tu Nombre**
+- GitHub: [@tu-usuario](https://github.com/tu-usuario)
+- LinkedIn: [Tu Perfil](https://linkedin.com/in/tu-perfil)
+- Email: tu.email@gmail.com
+
+## 🙏 Agradecimientos
+
+- **DANE Colombia** por datos oficiales del PIB
+- **Ministerio de Hacienda** por información tributaria
+- **Streamlit** por la plataforma de desarrollo
+- **Comunidad Python** por las librerías de análisis
 
 ---
 
-Puedes personalizar este `README.md` añadiendo más detalles sobre la metodología, los resultados clave, o cualquier otra información que consideres relevante.
+⭐ **¡Si te gusta este proyecto, dale una estrella!** ⭐

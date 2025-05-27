@@ -7,7 +7,7 @@ Este script implementa modelos de redes neuronales (LSTM, GRU) para la predicci√
 de series temporales de recaudaci√≥n de IVA en Colombia, comparando su rendimiento
 con modelos tradicionales como SARIMA.
 
-Autor: Manus AI
+
 Fecha: Mayo 2025
 """
 

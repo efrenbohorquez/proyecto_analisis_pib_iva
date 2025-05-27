@@ -1,0 +1,14 @@
+# Dependencias avanzadas para análisis de series temporales
+streamlit>=1.28.0
+plotly>=5.15.0
+pandas>=1.5.0
+numpy>=1.21.0
+scikit-learn>=1.3.0
+
+# Series temporales
+statsmodels>=0.14.0
+pmdarima>=2.0.0
+arch>=5.3.0
+
+# Análisis estadístico
+scipy>=1.9.0
